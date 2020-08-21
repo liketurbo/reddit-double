@@ -6,6 +6,7 @@ import {
   Arg,
   Ctx,
   ObjectType,
+  Query,
 } from "type-graphql";
 import { MyContext } from "src/types";
 import User from "../entities/User";
@@ -42,6 +43,31 @@ class UserResponse {
 
 @Resolver()
 export default class UserResolver {
+  @Query(() => UserResponse)
+  async me(@Ctx() { session, em }: MyContext): Promise<UserResponse> {
+    try {
+      if (session.userId) {
+        const user = await em.findOneOrFail(User, { id: session.userId });
+
+        return {
+          user,
+        };
+      }
+
+      throw new Error("Session doesn't have userId");
+    } catch (err) {
+      return {
+        errors: [{ field: "user", message: "User is not authenticated" }],
+      };
+    }
+  }
+
+  @Mutation()
+  logout(@Ctx() { session }: MyContext): Boolean {
+    delete session.userId;
+    return true;
+  }
+
   @Mutation(() => UserResponse)
   async register(
     @Arg("input") { username, password }: UsernamePasswordInput,
@@ -81,7 +107,7 @@ export default class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Arg("input") { username, password }: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, session }: MyContext
   ): Promise<UserResponse> {
     try {
       const usernameErrors = usernameValidation(username);
@@ -96,6 +122,8 @@ export default class UserResolver {
 
       const valid = await argon2.verify(user.passwordHash, password);
       if (!valid) throw new Error("Invalid password");
+
+      session.userId = user.id;
 
       return { user };
     } catch {

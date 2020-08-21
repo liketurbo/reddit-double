@@ -1,5 +1,6 @@
 import { EntityManager, IDatabaseDriver, Connection } from "mikro-orm";
 
-export type MyContext {
-  em: EntityManager<IDatabaseDriver<Connection>>
+export interface MyContext {
+  em: EntityManager<IDatabaseDriver<Connection>>;
+  session: Express.Session;
 }
