@@ -8,7 +8,8 @@
   "scripts": {
     "dev:watch": "tsc -w",
     "dev:run": "nodemon dist/index.js",
-    "dev": "yarn dev:watch | yarn dev:run"
+    "dev": "yarn dev:watch | yarn dev:run",
+    "migration:create": "mikro-orm migration:create"
   },
   "devDependencies": {
     "@types/node": "^14.6.0",
@@ -18,6 +19,7 @@
   },
   "dependencies": {
     "apollo-server": "^2.16.1",
+    "argon2": "^0.27.0",
     "graphql": "^15.3.0",
     "mikro-orm": "^3.6.15",
     "pg": "^8.3.2",

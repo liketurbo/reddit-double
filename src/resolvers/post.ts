@@ -1,4 +1,4 @@
-import { Resolver, Query, Ctx, Arg, Mutation } from "type-graphql";
+import { Resolver, Query, Ctx, Arg, Mutation, Int } from "type-graphql";
 import Post from "../entities/Post";
 import { MyContext } from "../types";
 
@@ -11,7 +11,7 @@ export default class PostResolver {
 
   @Query(() => Post, { nullable: true })
   async post(
-    @Arg("id") id: number,
+    @Arg("id", () => Int) id: number,
     @Ctx() { em }: MyContext
   ): Promise<Post | null> {
     return em.findOne(Post, { id });
@@ -29,7 +29,7 @@ export default class PostResolver {
 
   @Mutation(() => Post, { nullable: true })
   async updatePost(
-    @Arg("id") id: number,
+    @Arg("id", () => Int) id: number,
     @Arg("title") title: string,
     @Ctx() { em }: MyContext
   ): Promise<Post | null> {
@@ -45,7 +45,7 @@ export default class PostResolver {
 
   @Mutation(() => Boolean)
   async removePost(
-    @Arg("id") id: number,
+    @Arg("id", () => Int) id: number,
     @Ctx() { em }: MyContext
   ): Promise<boolean> {
     const affected = await em.remove(Post, { id });
