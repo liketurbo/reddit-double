@@ -3,31 +3,26 @@ import { Formik, Form } from "formik";
 import { Button } from "@chakra-ui/core";
 import Container from "../../components/Container";
 import TextField from "../../components/TextField";
-import { useRegisterMutation } from "../graphql/generated/graphql";
+import { useLoginMutation } from "../graphql/generated/graphql";
 import toErrorMap from "../utils/toErrorMap";
 import { useRouter } from "next/router";
 
-const RegisterPage = () => {
-  const [, register] = useRegisterMutation();
+const LoginPage = () => {
+  const [, login] = useLoginMutation();
 
   const router = useRouter();
 
   return (
     <Container>
       <Formik
-        initialValues={{ username: "", password: "", repeatPassword: "" }}
+        initialValues={{ username: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
-          if (values.password !== values.repeatPassword) {
-            setErrors({ repeatPassword: "Passwords doesn't match" });
-            return;
-          }
-
-          const res = await register({
-            input: { username: values.username, password: values.password },
+          const res = await login({
+            input: values,
           });
 
-          if (res.data?.register.errors?.length) {
-            const errors = toErrorMap(res.data.register.errors);
+          if (res.data?.login.errors?.length) {
+            const errors = toErrorMap(res.data.login.errors);
             setErrors(errors);
             return;
           }
@@ -48,19 +43,13 @@ const RegisterPage = () => {
               placeholder="*********"
               type="password"
             />
-            <TextField
-              name="repeatPassword"
-              label="Repeat password"
-              placeholder="*********"
-              type="password"
-            />
             <Button
               mt={4}
               variantColor="teal"
               isLoading={props.isSubmitting}
               type="submit"
             >
-              Register
+              Login
             </Button>
           </Form>
         )}
@@ -69,4 +58,4 @@ const RegisterPage = () => {
   );
 };
 
-export default RegisterPage;
+export default LoginPage;

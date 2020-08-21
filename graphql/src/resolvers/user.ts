@@ -130,7 +130,11 @@ export default class UserResolver {
       return {
         errors: [
           {
-            field: "username,password",
+            field: "username",
+            message: "Invalid password or username",
+          },
+          {
+            field: "password",
             message: "Invalid password or username",
           },
         ],
