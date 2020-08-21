@@ -16,7 +16,7 @@ const NavBar = () => {
 
   let body = null;
 
-  if (fetching) body = <Spinner />;
+  if (fetching) body = <Spinner ml="auto" />;
   else if (!data?.me.user)
     body = (
       <>
