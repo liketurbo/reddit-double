@@ -20,7 +20,7 @@ const LoginPage = () => {
       <NavBar />
       <Container>
         <Formik
-          initialValues={{ username: "", password: "" }}
+          initialValues={{ usernameOrEmail: "", password: "" }}
           onSubmit={async (values, { setErrors }) => {
             const res = await login({
               input: values,
@@ -38,9 +38,9 @@ const LoginPage = () => {
           {(props) => (
             <Form>
               <TextField
-                name="username"
-                label="Username"
-                placeholder="john_wick"
+                name="usernameOrEmail"
+                label="Username or Email"
+                placeholder="john_wick or john_wick@mail.com"
               />
               <TextField
                 name="password"

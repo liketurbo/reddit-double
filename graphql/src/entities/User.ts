@@ -17,9 +17,13 @@ export default class User {
   updatedAt = new Date();
 
   @Field()
-  @Property({ type: "text", unique: true })
+  @Property({ unique: true })
   username: string;
 
-  @Property({ type: "text" })
+  @Property()
   passwordHash: string;
+
+  @Field()
+  @Property({ unique: true })
+  email: string;
 }

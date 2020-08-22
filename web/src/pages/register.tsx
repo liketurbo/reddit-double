@@ -20,7 +20,12 @@ const RegisterPage = () => {
       <NavBar />
       <Container>
         <Formik
-          initialValues={{ username: "", password: "", repeatPassword: "" }}
+          initialValues={{
+            username: "",
+            password: "",
+            repeatPassword: "",
+            email: "",
+          }}
           onSubmit={async (values, { setErrors }) => {
             if (values.password !== values.repeatPassword) {
               setErrors({ repeatPassword: "Passwords doesn't match" });
@@ -28,7 +33,11 @@ const RegisterPage = () => {
             }
 
             const res = await register({
-              input: { username: values.username, password: values.password },
+              input: {
+                username: values.username,
+                password: values.password,
+                email: values.email,
+              },
             });
 
             if (res.data?.register.errors?.length) {
@@ -46,6 +55,11 @@ const RegisterPage = () => {
                 name="username"
                 label="Username"
                 placeholder="john_wick"
+              />
+              <TextField
+                name="email"
+                label="Email"
+                placeholder="john_wick@mail.com"
               />
               <TextField
                 name="password"

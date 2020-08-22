@@ -13,14 +13,28 @@ import User from "../entities/User";
 import argon2 from "argon2";
 import usernameValidation from "../validation/username";
 import passwordValidation from "../validation/password";
+import emailValidation from "../validation/email";
+import usernameOrEmailValidation from "../validation/usernameOrEmail";
 
 @InputType()
-class UsernamePasswordInput {
+class LoginInput {
+  @Field()
+  usernameOrEmail: string;
+
+  @Field()
+  password: string;
+}
+
+@InputType()
+class RegisterInput {
   @Field()
   username: string;
 
   @Field()
   password: string;
+
+  @Field()
+  email: string;
 }
 
 @ObjectType()
@@ -78,21 +92,22 @@ export default class UserResolver {
 
   @Mutation(() => UserResponse)
   async register(
-    @Arg("input") { username, password }: UsernamePasswordInput,
+    @Arg("input") { username, password, email }: RegisterInput,
     @Ctx() { em }: MyContext
   ): Promise<UserResponse> {
     try {
       const usernameErrors = usernameValidation(username);
       const passwordErrors = passwordValidation(password);
+      const emailErrors = emailValidation(email);
 
-      if (usernameErrors.length || passwordErrors.length)
+      if (usernameErrors.length || passwordErrors.length || emailErrors.length)
         return {
-          errors: [...usernameErrors, ...passwordErrors],
+          errors: [...usernameErrors, ...passwordErrors, ...emailErrors],
         };
 
       const passwordHash = await argon2.hash(password);
 
-      const user = em.create(User, { username, passwordHash });
+      const user = em.create(User, { username, passwordHash, email });
       await em.persistAndFlush(user);
 
       return { user };
@@ -114,39 +129,45 @@ export default class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg("input") { username, password }: UsernamePasswordInput,
+    @Arg("input") { usernameOrEmail, password }: LoginInput,
     @Ctx() { em, session }: MyContext
   ): Promise<UserResponse> {
-    try {
-      const usernameErrors = usernameValidation(username);
-      const passwordErrors = passwordValidation(password);
+    const usernameOrEmailErrors = usernameOrEmailValidation(usernameOrEmail);
+    const passwordErrors = passwordValidation(password);
 
-      if (usernameErrors.length || passwordErrors.length)
-        return {
-          errors: [...usernameErrors, ...passwordErrors],
-        };
+    if (usernameOrEmailErrors.length || passwordErrors.length)
+      return {
+        errors: [...usernameOrEmailErrors, ...passwordErrors],
+      };
 
-      const user = await em.findOneOrFail(User, { username });
+    const user = await em.findOne(User, {
+      $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
+    });
 
-      const valid = await argon2.verify(user.passwordHash, password);
-      if (!valid) throw new Error("Invalid password");
-
-      session.userId = user.id;
-
-      return { user };
-    } catch {
+    if (!user)
       return {
         errors: [
           {
-            field: "username",
-            message: "Invalid password or username",
-          },
-          {
-            field: "password",
-            message: "Invalid password or username",
+            field: "usernameOrEmail",
+            message: "Invalid username or email",
           },
         ],
       };
-    }
+
+    const valid = await argon2.verify(user.passwordHash, password);
+
+    if (!valid)
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "Invalid password",
+          },
+        ],
+      };
+
+    session.userId = user.id;
+
+    return { user };
   }
 }

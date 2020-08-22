@@ -12,6 +12,7 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import ms from "ms";
 import { MyContext } from "./types";
+import sendEmail from "./utils/sendEmail";
 
 const RedisStore = connectRedis(session);
 const redisClient = redis.createClient();

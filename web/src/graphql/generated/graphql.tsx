@@ -54,6 +54,7 @@ export type User = {
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
   username: Scalars['String'];
+  email: Scalars['String'];
 };
 
 export type Mutation = {
@@ -84,26 +85,32 @@ export type MutationRemovePostArgs = {
 
 
 export type MutationRegisterArgs = {
-  input: UsernamePasswordInput;
+  input: RegisterInput;
 };
 
 
 export type MutationLoginArgs = {
-  input: UsernamePasswordInput;
+  input: LoginInput;
 };
 
-export type UsernamePasswordInput = {
+export type RegisterInput = {
   username: Scalars['String'];
+  password: Scalars['String'];
+  email: Scalars['String'];
+};
+
+export type LoginInput = {
+  usernameOrEmail: Scalars['String'];
   password: Scalars['String'];
 };
 
 export type UserFragment = (
   { __typename?: 'User' }
-  & Pick<User, 'id' | 'username'>
+  & Pick<User, 'id' | 'username' | 'email'>
 );
 
 export type LoginMutationVariables = Exact<{
-  input: UsernamePasswordInput;
+  input: LoginInput;
 }>;
 
 
@@ -130,7 +137,7 @@ export type LogoutMutation = (
 );
 
 export type RegisterMutationVariables = Exact<{
-  input: UsernamePasswordInput;
+  input: RegisterInput;
 }>;
 
 
@@ -177,10 +184,11 @@ export const UserFragmentDoc = gql`
     fragment User on User {
   id
   username
+  email
 }
     `;
 export const LoginDocument = gql`
-    mutation Login($input: UsernamePasswordInput!) {
+    mutation Login($input: LoginInput!) {
   login(input: $input) {
     user {
       ...User
@@ -206,7 +214,7 @@ export function useLogoutMutation() {
   return Urql.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument);
 };
 export const RegisterDocument = gql`
-    mutation Register($input: UsernamePasswordInput!) {
+    mutation Register($input: RegisterInput!) {
   register(input: $input) {
     user {
       ...User
