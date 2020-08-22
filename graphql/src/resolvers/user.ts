@@ -62,10 +62,18 @@ export default class UserResolver {
     }
   }
 
-  @Mutation()
-  logout(@Ctx() { session }: MyContext): Boolean {
-    delete session.userId;
-    return true;
+  @Mutation(() => Boolean)
+  logout(@Ctx() { session }: MyContext): Promise<Boolean> {
+    return new Promise((res) =>
+      session.destroy((err) => {
+        if (err) {
+          console.error(err);
+          res(false);
+        }
+
+        res(true);
+      })
+    );
   }
 
   @Mutation(() => UserResponse)

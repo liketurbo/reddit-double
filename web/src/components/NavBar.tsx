@@ -9,9 +9,10 @@ import {
   Divider,
 } from "@chakra-ui/core";
 import Link from "next/link";
-import { useMeQuery } from "../graphql/generated/graphql";
+import { useMeQuery, useLogoutMutation } from "../graphql/generated/graphql";
 
 const NavBar = () => {
+  const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
   const [{ data, fetching }] = useMeQuery();
 
   let body = null;
@@ -41,7 +42,9 @@ const NavBar = () => {
         />
         <Text lineHeight={1.25}>{data.me.user.username}</Text>
         <Divider orientation="vertical" />
-        <Button size="xs">Logout</Button>
+        <Button isLoading={logoutFetching} onClick={() => logout()} size="xs">
+          Logout
+        </Button>
       </Flex>
     );
 
