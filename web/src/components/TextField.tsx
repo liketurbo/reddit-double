@@ -11,7 +11,7 @@ const TextField = ({ label, ...props }: TextFieldProps) => {
   const [field, meta] = useField(props);
 
   return (
-    <FormControl isInvalid={meta.error && meta.touched}>
+    <FormControl isInvalid={Boolean(meta.error) && meta.touched}>
       <FormLabel htmlFor={field.name}>{label}</FormLabel>
       <Input
         {...(props as any)}
