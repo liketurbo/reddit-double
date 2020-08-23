@@ -12,6 +12,7 @@ import {
 import Post from "../entities/Post";
 import { MyContext } from "../types";
 import isAuthenticated from "../middleware/isAuthenticated";
+import { getConnection } from "typeorm";
 
 @InputType()
 class PostInput {
@@ -25,8 +26,21 @@ class PostInput {
 @Resolver()
 export default class PostResolver {
   @Query(() => [Post])
-  posts(): Promise<Post[]> {
-    return Post.find();
+  posts(
+    @Arg("limit", () => Int) limit: number,
+    @Arg("cursor", () => Date, { nullable: true }) cursor: string | null
+  ): Promise<Post[]> {
+    limit = Math.min(50, limit);
+
+    const qb = getConnection()
+      .getRepository(Post)
+      .createQueryBuilder("p")
+      .orderBy('"createdAt"', "DESC")
+      .take(limit);
+
+    if (cursor) qb.where('"createdAt" < :cursor', { cursor });
+
+    return qb.getMany();
   }
 
   @Query(() => Post, { nullable: true })

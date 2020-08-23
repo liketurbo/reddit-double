@@ -193,7 +193,8 @@ export default class UserResolver {
 
   @Mutation(() => UserResponse)
   async register(
-    @Arg("input") { username, password, email }: RegisterInput
+    @Arg("input") { username, password, email }: RegisterInput,
+    @Ctx() { session }: MyContext
   ): Promise<UserResponse> {
     try {
       const usernameErrors = usernameValidation(username);
@@ -208,6 +209,8 @@ export default class UserResolver {
       const passwordHash = await argon2.hash(password);
 
       const user = await User.create({ username, passwordHash, email }).save();
+
+      session.userId = user.id;
 
       return { user };
     } catch (err) {

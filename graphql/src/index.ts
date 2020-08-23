@@ -44,7 +44,7 @@ const start = async () => {
         secure: PRODUCTION,
         sameSite: "lax",
       },
-      saveUninitialized: true,
+      saveUninitialized: false,
     })
   );
 

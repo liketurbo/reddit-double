@@ -1,18 +1,24 @@
-import { Text } from "@chakra-ui/core";
+import { Text, Spinner } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import createUrqlClient from "../utils/createUrqlClient";
 import { usePostsQuery } from "../graphql/generated/graphql";
 import NavBar from "../components/NavBar";
 
 const IndexPage = () => {
-  const [{ data }] = usePostsQuery();
+  const [{ data, fetching }] = usePostsQuery({
+    variables: {
+      limit: 10,
+    },
+  });
+
+  if (fetching) return <Spinner />;
 
   return (
     <>
       <NavBar />
-      {!data
-        ? null
-        : data.posts.map((post) => <Text key={post.id}>{post.title}</Text>)}
+      {data?.posts.map((post) => (
+        <Text key={post.id}>{post.title}</Text>
+      ))}
     </>
   );
 };
