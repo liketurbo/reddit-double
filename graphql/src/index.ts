@@ -14,13 +14,14 @@ import Redis from "ioredis";
 import { createConnection } from "typeorm";
 import Post from "./entities/Post";
 import User from "./entities/User";
+import path from "path";
 
 const RedisStore = connectRedis(session);
 
 const redisClient = new Redis();
 
 const start = async () => {
-  await createConnection({
+  const con = await createConnection({
     type: "postgres",
     database: "reddit-double",
     username: "Ramzan",
@@ -28,7 +29,10 @@ const start = async () => {
     entities: [Post, User],
     logging: true,
     synchronize: true,
+    migrations: [path.join(__dirname, "./migrations/*.*")],
   });
+
+  await con.runMigrations();
 
   const app = express();
 
