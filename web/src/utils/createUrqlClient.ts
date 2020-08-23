@@ -8,6 +8,22 @@ import {
 } from "../graphql/generated/graphql";
 import { cacheExchange, Cache } from "@urql/exchange-graphcache";
 import { SSRExchange } from "next-urql";
+import { pipe, tap } from "wonka";
+import { Exchange } from "urql";
+import Router from "next/router";
+
+export const errorExchange: Exchange = ({ forward }) => (ops$) => {
+  return pipe(
+    forward(ops$),
+    tap(({ error }) => {
+      // If the OperationResult has an error send a request to sentry
+      if (error?.message.includes("Not authenticated")) {
+        // the error is a CombinedError with networkError and graphqlErrors properties
+        Router.replace("/login");
+      }
+    })
+  );
+};
 
 const createUpdateQuery = <Result, Data>(cache: Cache, result: any) => (
   query: DocumentNode,
@@ -64,6 +80,7 @@ const createUrqlClient = (ssrExchange: SSRExchange) => ({
         },
       },
     }),
+    errorExchange,
     ssrExchange,
     fetchExchange,
   ],

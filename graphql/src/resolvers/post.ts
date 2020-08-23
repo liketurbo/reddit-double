@@ -10,8 +10,8 @@ import {
   UseMiddleware,
 } from "type-graphql";
 import Post from "../entities/Post";
-import { MyContext } from "src/types";
-import isAuthenticated from "src/middleware/isAuthenticated";
+import { MyContext } from "../types";
+import isAuthenticated from "../middleware/isAuthenticated";
 
 @InputType()
 class PostInput {

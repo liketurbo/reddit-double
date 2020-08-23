@@ -49,9 +49,15 @@ const NavBar = () => {
     );
 
   return (
-    <Flex bg="tomato" p={4}>
+    <Flex position="sticky" top={0} zIndex={1} bg="tomato" p={4}>
       <Link href="/" passHref>
         <ChakraLink>Home</ChakraLink>
+      </Link>
+      <Link href="/" passHref>
+        <ChakraLink ml={6}>Posts</ChakraLink>
+      </Link>
+      <Link href="/create-post" passHref>
+        <ChakraLink ml={2}>Create post</ChakraLink>
       </Link>
       {body}
     </Flex>

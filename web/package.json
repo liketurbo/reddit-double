@@ -23,7 +23,8 @@
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-is": "^16.13.1",
-    "urql": "^1.10.0"
+    "urql": "^1.10.0",
+    "wonka": "^4.0.14"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "1.17.8",
