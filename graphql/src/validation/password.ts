@@ -1,9 +1,9 @@
-const passwordValidation = (password: string) => {
+const passwordValidation = (password: string, field: string = "password") => {
   const errors = [];
 
   if (password.length <= 2)
     errors.push({
-      field: "password",
+      field,
       message: "Length must be greater than 2",
     });
 

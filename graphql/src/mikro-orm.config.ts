@@ -1,6 +1,6 @@
 import Post from "./entities/Post";
 import User from "./entities/User";
-import { __prod__ } from "./constants";
+import { PRODUCTION } from "./constants";
 import { MikroORMOptions } from "mikro-orm";
 import path from "path";
 
@@ -11,7 +11,7 @@ const MikroOrmConfig = {
   },
   dbName: "reddit-double",
   type: "postgresql",
-  debug: !__prod__,
+  debug: !PRODUCTION,
   user: "Ramzan",
   password: "postgres",
   entities: [Post, User] as any,

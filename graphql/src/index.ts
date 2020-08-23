@@ -1,5 +1,5 @@
 import { MikroORM } from "mikro-orm";
-import { __prod__ } from "./constants";
+import { PRODUCTION } from "./constants";
 import MikroOrmConfig from "./mikro-orm.config";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
@@ -7,15 +7,15 @@ import HelloResolver from "./resolvers/hello";
 import PostResolver from "./resolvers/post";
 import UserResolver from "./resolvers/user";
 import express from "express";
-import redis from "redis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import ms from "ms";
 import { MyContext } from "./types";
-import sendEmail from "./utils/sendEmail";
+import Redis from "ioredis";
 
 const RedisStore = connectRedis(session);
-const redisClient = redis.createClient();
+
+const redisClient = new Redis();
 
 const start = async () => {
   const orm = await MikroORM.init(MikroOrmConfig);
@@ -32,7 +32,7 @@ const start = async () => {
       cookie: {
         maxAge: ms("10y"),
         httpOnly: true,
-        secure: __prod__,
+        secure: PRODUCTION,
         sameSite: "lax",
       },
       saveUninitialized: true,
@@ -47,6 +47,7 @@ const start = async () => {
     context: ({ req }): MyContext => ({
       em: orm.em,
       session: req.session as Express.Session,
+      redis: redisClient,
     }),
   });
 

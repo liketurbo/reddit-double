@@ -1,7 +1,7 @@
 import React from "react";
 import { withUrqlClient } from "next-urql";
 import { Formik, Form } from "formik";
-import { Button } from "@chakra-ui/core";
+import { Button, Box } from "@chakra-ui/core";
 import Container from "../components/Container";
 import TextField from "../components/TextField";
 import { useLoginMutation } from "../graphql/generated/graphql";
@@ -9,6 +9,8 @@ import toErrorMap from "../utils/toErrorMap";
 import { useRouter } from "next/router";
 import createUrqlClient from "../utils/createUrqlClient";
 import NavBar from "../components/NavBar";
+import Link from "next/link";
+import { Link as ChakraLink } from "@chakra-ui/core";
 
 const LoginPage = () => {
   const [, login] = useLoginMutation();
@@ -56,6 +58,11 @@ const LoginPage = () => {
               >
                 Login
               </Button>
+              <Box mt={2}>
+                <Link href="/forgot-password" passHref>
+                  <ChakraLink color="teal.500">Forgot password?</ChakraLink>
+                </Link>
+              </Box>
             </Form>
           )}
         </Formik>

@@ -60,6 +60,7 @@ const RegisterPage = () => {
                 name="email"
                 label="Email"
                 placeholder="john_wick@mail.com"
+                type="email"
               />
               <TextField
                 name="password"
@@ -79,7 +80,7 @@ const RegisterPage = () => {
                 isLoading={props.isSubmitting}
                 type="submit"
               >
-                Register
+                Reset password
               </Button>
             </Form>
           )}

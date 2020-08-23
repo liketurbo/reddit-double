@@ -16,6 +16,9 @@ import passwordValidation from "../validation/password";
 import emailValidation from "../validation/email";
 import usernameOrEmailValidation from "../validation/usernameOrEmail";
 import sendEmail from "../utils/sendEmail";
+import * as uuid from "uuid";
+import { FORGET_PASSWORD_PREFIX } from "../constants";
+import ms from "ms";
 
 @InputType()
 class LoginInput {
@@ -56,20 +59,105 @@ class UserResponse {
   user?: User;
 }
 
+@ObjectType()
+class OperationResponse {
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
+
+  @Field(() => Boolean, { defaultValue: false })
+  success?: Boolean = false;
+}
+
+@InputType()
+class ChangePasswordInput {
+  @Field()
+  token: string;
+
+  @Field()
+  newPassword: string;
+}
+
 @Resolver()
 export default class UserResolver {
-  @Mutation(() => Boolean)
-  async forgotPassword(@Arg("email") email: string, @Ctx() { em }: MyContext) {
-    const user = em.findOne(User, { email });
+  @Mutation(() => OperationResponse)
+  async changePassword(
+    @Arg("input", () => ChangePasswordInput)
+    { newPassword, token }: ChangePasswordInput,
+    @Ctx() { redis, em, session }: MyContext
+  ): Promise<OperationResponse> {
+    const errors = passwordValidation(newPassword, "newPassword");
 
-    if (!user) return true;
+    if (errors.length)
+      return {
+        errors,
+      };
 
-    const token = Math.random().toString(26).slice(2);
-    const link = `<a href="http://localhost:1234/change-password/${token}">Reset password</a>`;
+    const key = `${FORGET_PASSWORD_PREFIX}:${token}`;
 
-    await sendEmail(email, link);
+    const userId = await redis.get(key);
 
-    return true;
+    if (!userId)
+      return {
+        errors: [{ field: "token", message: "Reset link expired" }],
+      };
+
+    const user = await em.findOne(User, { id: +userId });
+
+    if (!user)
+      return {
+        errors: [{ field: "token", message: "User no longer exists" }],
+      };
+
+    const passwordHash = await argon2.hash(newPassword);
+
+    user.passwordHash = passwordHash;
+
+    await em.flush();
+
+    session.userId = user.id;
+
+    await redis.del(key);
+
+    return {
+      success: true,
+    };
+  }
+
+  @Mutation(() => OperationResponse)
+  async forgotPassword(
+    @Arg("usernameOrEmail") usernameOrEmail: string,
+    @Ctx() { em, redis }: MyContext
+  ): Promise<OperationResponse> {
+    const errors = usernameOrEmailValidation(usernameOrEmail);
+
+    if (errors.length)
+      return {
+        errors,
+      };
+
+    const user = await em.findOne(User, {
+      $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
+    });
+
+    if (!user)
+      return {
+        success: true,
+      };
+
+    const token = uuid.v4();
+
+    await redis.set(
+      `${FORGET_PASSWORD_PREFIX}:${token}`,
+      user.id,
+      "px",
+      ms("1h")
+    );
+    await sendEmail(
+      user.email,
+      `<a href="http://localhost:1234/change-password/${token}">Reset password</a><br>Link will expire in 1 hour.`
+    );
+
+    return { success: true };
   }
 
   @Query(() => UserResponse)
