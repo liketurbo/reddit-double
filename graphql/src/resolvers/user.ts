@@ -8,7 +8,7 @@ import {
   ObjectType,
   Query,
 } from "type-graphql";
-import { MyContext } from "src/types";
+import { MyContext } from "../types";
 import User from "../entities/User";
 import argon2 from "argon2";
 import usernameValidation from "../validation/username";
@@ -83,7 +83,7 @@ export default class UserResolver {
   async changePassword(
     @Arg("input", () => ChangePasswordInput)
     { newPassword, token }: ChangePasswordInput,
-    @Ctx() { redis, em, session }: MyContext
+    @Ctx() { redis, session }: MyContext
   ): Promise<OperationResponse> {
     const errors = passwordValidation(newPassword, "newPassword");
 
@@ -101,7 +101,7 @@ export default class UserResolver {
         errors: [{ field: "token", message: "Reset link expired" }],
       };
 
-    const user = await em.findOne(User, { id: +userId });
+    const user = await User.findOne(+userId);
 
     if (!user)
       return {
@@ -110,9 +110,7 @@ export default class UserResolver {
 
     const passwordHash = await argon2.hash(newPassword);
 
-    user.passwordHash = passwordHash;
-
-    await em.flush();
+    await User.update({ id: +userId }, { passwordHash });
 
     session.userId = user.id;
 
@@ -126,7 +124,7 @@ export default class UserResolver {
   @Mutation(() => OperationResponse)
   async forgotPassword(
     @Arg("usernameOrEmail") usernameOrEmail: string,
-    @Ctx() { em, redis }: MyContext
+    @Ctx() { redis }: MyContext
   ): Promise<OperationResponse> {
     const errors = usernameOrEmailValidation(usernameOrEmail);
 
@@ -135,8 +133,8 @@ export default class UserResolver {
         errors,
       };
 
-    const user = await em.findOne(User, {
-      $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
+    const user = await User.findOne({
+      where: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
     });
 
     if (!user)
@@ -161,10 +159,10 @@ export default class UserResolver {
   }
 
   @Query(() => UserResponse)
-  async me(@Ctx() { session, em }: MyContext): Promise<UserResponse> {
+  async me(@Ctx() { session }: MyContext): Promise<UserResponse> {
     try {
       if (session.userId) {
-        const user = await em.findOneOrFail(User, { id: session.userId });
+        const user = await User.findOneOrFail(session.userId);
 
         return {
           user,
@@ -195,8 +193,7 @@ export default class UserResolver {
 
   @Mutation(() => UserResponse)
   async register(
-    @Arg("input") { username, password, email }: RegisterInput,
-    @Ctx() { em }: MyContext
+    @Arg("input") { username, password, email }: RegisterInput
   ): Promise<UserResponse> {
     try {
       const usernameErrors = usernameValidation(username);
@@ -210,13 +207,10 @@ export default class UserResolver {
 
       const passwordHash = await argon2.hash(password);
 
-      const user = em.create(User, { username, passwordHash, email });
-      await em.persistAndFlush(user);
+      const user = await User.create({ username, passwordHash, email }).save();
 
       return { user };
     } catch (err) {
-      em.clear();
-
       if (err.code === "23505")
         return {
           errors: [{ field: "username", message: "Username already in use" }],
@@ -233,7 +227,7 @@ export default class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Arg("input") { usernameOrEmail, password }: LoginInput,
-    @Ctx() { em, session }: MyContext
+    @Ctx() { session }: MyContext
   ): Promise<UserResponse> {
     const usernameOrEmailErrors = usernameOrEmailValidation(usernameOrEmail);
     const passwordErrors = passwordValidation(password);
@@ -243,8 +237,8 @@ export default class UserResolver {
         errors: [...usernameOrEmailErrors, ...passwordErrors],
       };
 
-    const user = await em.findOne(User, {
-      $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
+    const user = await User.findOne({
+      where: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
     });
 
     if (!user)
