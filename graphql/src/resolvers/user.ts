@@ -15,6 +15,7 @@ import usernameValidation from "../validation/username";
 import passwordValidation from "../validation/password";
 import emailValidation from "../validation/email";
 import usernameOrEmailValidation from "../validation/usernameOrEmail";
+import sendEmail from "../utils/sendEmail";
 
 @InputType()
 class LoginInput {
@@ -57,6 +58,20 @@ class UserResponse {
 
 @Resolver()
 export default class UserResolver {
+  @Mutation(() => Boolean)
+  async forgotPassword(@Arg("email") email: string, @Ctx() { em }: MyContext) {
+    const user = em.findOne(User, { email });
+
+    if (!user) return true;
+
+    const token = Math.random().toString(26).slice(2);
+    const link = `<a href="http://localhost:1234/change-password/${token}">Reset password</a>`;
+
+    await sendEmail(email, link);
+
+    return true;
+  }
+
   @Query(() => UserResponse)
   async me(@Ctx() { session, em }: MyContext): Promise<UserResponse> {
     try {
