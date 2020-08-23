@@ -12,7 +12,14 @@ const useAuthenticated = () => {
   const [, createPost] = useCreatePostMutation();
 
   useEffect(() => {
-    if (!data?.me.user && !fetching) router.replace("/login");
+    console.log(window.location.origin);
+
+    if (!data?.me.user && !fetching) {
+      const url = new URL("/login", window.location.origin);
+      url.searchParams.append("next", router.pathname);
+
+      router.replace(url);
+    }
   }, [data, fetching, router]);
 };
 

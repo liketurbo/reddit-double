@@ -20,12 +20,14 @@ import Link from "next/link";
 import { Button, Link as ChakraLink } from "@chakra-ui/core";
 import { GetServerSideProps } from "next";
 
-const ChangePasswordPage = ({ token }: ChangePasswordPageProps) => {
+const ChangePasswordPage = () => {
   const [, changePassword] = useChangePasswordMutation();
 
   const router = useRouter();
 
   const [tokenError, setTokenError] = useState("");
+
+  const token = router.query.token === "string" ? router.query.token : "";
 
   if (!token) return <ErrorPage statusCode={404} />;
 
@@ -110,20 +112,6 @@ const ChangePasswordPage = ({ token }: ChangePasswordPageProps) => {
       </Container>
     </>
   );
-};
-
-interface ChangePasswordPageProps {
-  token: string;
-}
-
-export const getServerSideProps: GetServerSideProps<ChangePasswordPageProps> = async (
-  ctx
-) => {
-  return {
-    props: {
-      token: typeof ctx.query.token === "string" ? ctx.query.token : "",
-    },
-  };
 };
 
 export default withUrqlClient(createUrqlClient)(ChangePasswordPage);

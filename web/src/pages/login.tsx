@@ -34,7 +34,9 @@ const LoginPage = () => {
               return;
             }
 
-            router.push("/");
+            router.push(
+              typeof router.query.next === "string" ? router.query.next : "/"
+            );
           }}
         >
           {(props) => (
