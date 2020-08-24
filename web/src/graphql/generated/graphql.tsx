@@ -42,13 +42,23 @@ export type PaginatedPosts = {
 export type Post = {
   __typename?: 'Post';
   id: Scalars['Int'];
+  title: Scalars['String'];
+  creatorId: Scalars['Int'];
+  creator: User;
+  content: Scalars['String'];
+  points: Scalars['Int'];
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
-  title: Scalars['String'];
-  creatorId: Scalars['Float'];
-  content: Scalars['String'];
-  points: Scalars['Float'];
   contentSnippet: Scalars['String'];
+};
+
+export type User = {
+  __typename?: 'User';
+  id: Scalars['Int'];
+  username: Scalars['String'];
+  email: Scalars['String'];
+  createdAt: Scalars['DateTime'];
+  updatedAt: Scalars['DateTime'];
 };
 
 
@@ -64,17 +74,9 @@ export type FieldError = {
   message: Scalars['String'];
 };
 
-export type User = {
-  __typename?: 'User';
-  id: Scalars['Int'];
-  createdAt: Scalars['DateTime'];
-  updatedAt: Scalars['DateTime'];
-  username: Scalars['String'];
-  email: Scalars['String'];
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
+  vote: Scalars['Boolean'];
   createPost: Post;
   updatePost?: Maybe<Post>;
   removePost: Scalars['Boolean'];
@@ -83,6 +85,12 @@ export type Mutation = {
   logout: Scalars['Boolean'];
   register: UserResponse;
   login: UserResponse;
+};
+
+
+export type MutationVoteArgs = {
+  value: Scalars['Int'];
+  postId: Scalars['Int'];
 };
 
 
@@ -279,6 +287,10 @@ export type PostsQuery = (
     & { posts: Array<(
       { __typename?: 'Post' }
       & Pick<Post, 'id' | 'title' | 'contentSnippet' | 'createdAt'>
+      & { creator: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'username'>
+      ) }
     )> }
   ) }
 );
@@ -407,6 +419,10 @@ export const PostsDocument = gql`
       title
       contentSnippet
       createdAt
+      creator {
+        id
+        username
+      }
     }
   }
 }

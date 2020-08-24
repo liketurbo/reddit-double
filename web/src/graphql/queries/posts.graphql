@@ -6,6 +6,10 @@ query Posts($limit: Int!, $cursor: DateTime) {
       title
       contentSnippet
       createdAt
+      creator {
+        id
+        username
+      }
     }
   }
 }

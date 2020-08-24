@@ -61,7 +61,15 @@ const IndexPage = () => {
       <Stack m={8} spacing={8}>
         {data.posts.posts.map((post) => (
           <Box p={5} shadow="md" borderWidth="1px" key={post.id}>
-            <Heading fontSize="xl">{post.title}</Heading>
+            <Heading isTruncated fontSize="xl">
+              {post.title}
+            </Heading>
+            <Flex>
+              <Text>Posted by </Text>
+              <Text ml={1} as="u">
+                {post.creator.username}
+              </Text>
+            </Flex>
             <Text mt={4}>{post.contentSnippet}</Text>
           </Box>
         ))}
