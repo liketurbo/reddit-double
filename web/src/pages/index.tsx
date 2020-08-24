@@ -27,7 +27,7 @@ const IndexPage = () => {
     variables,
   });
 
-  if (fetching) return <Spinner />;
+  if (!data && fetching) return <Spinner />;
 
   if (!data) return <ErrorPage statusCode={500} title={error?.message} />;
 
@@ -59,20 +59,20 @@ const IndexPage = () => {
         <Divider m={0} />
       </Box>
       <Stack m={8} spacing={8}>
-        {data.posts.map((post) => (
+        {data.posts.posts.map((post) => (
           <Box p={5} shadow="md" borderWidth="1px" key={post.id}>
             <Heading fontSize="xl">{post.title}</Heading>
             <Text mt={4}>{post.contentSnippet}</Text>
           </Box>
         ))}
       </Stack>
-      {data && (
+      {data.posts.hasMore && (
         <Flex justify="center" mb={16}>
           <Button
             onClick={() =>
               setVariables({
                 limit: variables.limit,
-                cursor: data.posts[data.posts.length - 1].createdAt,
+                cursor: data.posts.posts[data.posts.posts.length - 1].createdAt,
               })
             }
             isLoading={fetching}

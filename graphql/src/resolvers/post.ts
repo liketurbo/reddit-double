@@ -10,6 +10,7 @@ import {
   UseMiddleware,
   FieldResolver,
   Root,
+  ObjectType,
 } from "type-graphql";
 import Post from "../entities/Post";
 import { MyContext } from "../types";
@@ -25,6 +26,15 @@ class PostInput {
   content: string;
 }
 
+@ObjectType()
+class PaginatedPosts {
+  @Field(() => [Post])
+  posts: Post[];
+
+  @Field()
+  hasMore: Boolean;
+}
+
 @Resolver(Post)
 export default class PostResolver {
   @FieldResolver(() => String)
@@ -32,12 +42,12 @@ export default class PostResolver {
     return root.content.slice(0, 150);
   }
 
-  @Query(() => [Post])
-  posts(
+  @Query(() => PaginatedPosts)
+  async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => Date, { nullable: true }) cursor: Date | null
-  ): Promise<Post[]> {
-    limit = Math.min(50, limit);
+  ): Promise<PaginatedPosts> {
+    limit = Math.min(50, limit) + 1;
 
     const qb = getConnection()
       .getRepository(Post)
@@ -50,7 +60,12 @@ export default class PostResolver {
         cursor,
       });
 
-    return qb.getMany();
+    const posts = await qb.getMany();
+
+    return {
+      posts: posts.length === limit ? posts.slice(0, -1) : posts,
+      hasMore: posts.length === limit,
+    };
   }
 
   @Query(() => Post, { nullable: true })
