@@ -6,11 +6,95 @@ import {
   MeDocument,
   RegisterMutation,
 } from "../graphql/generated/graphql";
-import { cacheExchange, Cache } from "@urql/exchange-graphcache";
+import { cacheExchange, Cache, Resolver } from "@urql/exchange-graphcache";
 import { SSRExchange } from "next-urql";
 import { pipe, tap } from "wonka";
 import { Exchange } from "urql";
 import Router from "next/router";
+
+import { stringifyVariables } from "@urql/core";
+
+export interface PaginationParams {
+  offsetArgument?: string;
+  limitArgument?: string;
+}
+
+const cursorPagination: Resolver = (_, args, cache, info) => {
+  const { parentKey, fieldName } = info;
+
+  const allFields = cache.inspectFields(parentKey);
+  const fieldInfos = allFields.filter((info) => info.fieldName === fieldName);
+
+  if (!fieldInfos.length) return undefined;
+
+  const fieldKey = `${fieldName}(${stringifyVariables(args)})`;
+
+  info.partial = !cache.resolveFieldByKey(parentKey, fieldKey);
+
+  const res: string[] = [];
+
+  fieldInfos.forEach((fi) => {
+    const data = cache.resolveFieldByKey(parentKey, fi.fieldKey) as string[];
+    res.push(...data);
+  });
+
+  return res;
+
+  /*
+    const visited = new Set();
+    let result: NullArray<string> = [];
+    let prevOffset: number | null = null;
+
+    for (let i = 0; i < size; i++) {
+      const { fieldKey, arguments: args } = fieldInfos[i];
+      if (args === null || !compareArgs(fieldArgs, args)) {
+        continue;
+      }
+
+      const links = cache.resolveFieldByKey(entityKey, fieldKey) as string[];
+      const currentOffset = args[cursorArgument];
+
+      if (
+        links === null ||
+        links.length === 0 ||
+        typeof currentOffset !== "number"
+      ) {
+        continue;
+      }
+
+      if (!prevOffset || currentOffset > prevOffset) {
+        for (let j = 0; j < links.length; j++) {
+          const link = links[j];
+          if (visited.has(link)) continue;
+          result.push(link);
+          visited.add(link);
+        }
+      } else {
+        const tempResult: NullArray<string> = [];
+        for (let j = 0; j < links.length; j++) {
+          const link = links[j];
+          if (visited.has(link)) continue;
+          tempResult.push(link);
+          visited.add(link);
+        }
+        result = [...tempResult, ...result];
+      }
+
+      prevOffset = currentOffset;
+    }
+
+    const hasCurrentPage = cache.resolve(entityKey, fieldName, fieldArgs);
+    if (hasCurrentPage) {
+      return result;
+    } else if (!(info as any).store.schema) {
+      return undefined;
+    } else {
+      info.partial = true;
+      return result;
+    }
+
+  */
+};
 
 export const errorExchange: Exchange = ({ forward }) => (ops$) => {
   return pipe(
@@ -38,6 +122,11 @@ const createUrqlClient = (ssrExchange: SSRExchange) => ({
   exchanges: [
     dedupExchange,
     cacheExchange({
+      resolvers: {
+        Query: {
+          posts: cursorPagination,
+        },
+      },
       updates: {
         Mutation: {
           logout: (result, __, cache) => {

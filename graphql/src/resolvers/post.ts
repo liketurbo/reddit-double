@@ -8,6 +8,8 @@ import {
   Field,
   Ctx,
   UseMiddleware,
+  FieldResolver,
+  Root,
 } from "type-graphql";
 import Post from "../entities/Post";
 import { MyContext } from "../types";
@@ -23,12 +25,17 @@ class PostInput {
   content: string;
 }
 
-@Resolver()
+@Resolver(Post)
 export default class PostResolver {
+  @FieldResolver(() => String)
+  contentSnippet(@Root() root: Post) {
+    return root.content.slice(0, 150);
+  }
+
   @Query(() => [Post])
   posts(
     @Arg("limit", () => Int) limit: number,
-    @Arg("cursor", () => Date, { nullable: true }) cursor: string | null
+    @Arg("cursor", () => Date, { nullable: true }) cursor: Date | null
   ): Promise<Post[]> {
     limit = Math.min(50, limit);
 
@@ -38,7 +45,10 @@ export default class PostResolver {
       .orderBy('"createdAt"', "DESC")
       .take(limit);
 
-    if (cursor) qb.where('"createdAt" < :cursor', { cursor });
+    if (cursor)
+      qb.where('"createdAt" < :cursor', {
+        cursor,
+      });
 
     return qb.getMany();
   }

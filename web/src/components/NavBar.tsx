@@ -55,12 +55,6 @@ const NavBar = () => {
       <Link href="/" passHref>
         <ChakraLink>Home</ChakraLink>
       </Link>
-      <Link href="/" passHref>
-        <ChakraLink ml={6}>Posts</ChakraLink>
-      </Link>
-      <Link href="/create-post" passHref>
-        <ChakraLink ml={2}>Create post</ChakraLink>
-      </Link>
       {body}
     </Flex>
   );
