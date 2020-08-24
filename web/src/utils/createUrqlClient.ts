@@ -89,6 +89,15 @@ const createUrqlClient = (ssrExchange: SSRExchange) => ({
       },
       updates: {
         Mutation: {
+          createPost: (_, __, cache) => {
+            const allPostQueries = cache
+              .inspectFields("Query")
+              .filter((field) => /posts\(.+\)/.test(field.fieldKey));
+
+            allPostQueries.forEach(({ fieldKey }) => {
+              cache.invalidate("Query", fieldKey);
+            });
+          },
           logout: (result, __, cache) => {
             const updateQuery = createUpdateQuery<LoginMutation, MeQuery>(
               cache,

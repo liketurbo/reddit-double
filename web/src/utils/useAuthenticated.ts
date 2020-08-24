@@ -12,8 +12,6 @@ const useAuthenticated = () => {
   const [, createPost] = useCreatePostMutation();
 
   useEffect(() => {
-    console.log(window.location.origin);
-
     if (!data?.me.user && !fetching) {
       const url = new URL("/login", window.location.origin);
       url.searchParams.append("next", router.pathname);
