@@ -16,9 +16,10 @@ import {
 import Post from "../entities/Post";
 import { MyContext } from "../types";
 import isAuthenticated from "../middleware/isAuthenticated";
-import { getConnection } from "typeorm";
+import { getConnection, QueryRunner } from "typeorm";
 import { GraphQLResolveInfo } from "graphql";
 import graphqlFields from "graphql-fields";
+import Updoot, { UpdootValue } from "../entities/Updoot";
 
 @InputType()
 class PostInput {
@@ -41,8 +42,51 @@ class PaginatedPosts {
 @Resolver(Post)
 export default class PostResolver {
   @FieldResolver(() => String)
-  contentSnippet(@Root() root: Post) {
+  contentSnippet(@Root() root: Post): String {
     return root.content.slice(0, 150);
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuthenticated)
+  async vote(
+    @Arg("postId", () => Int) postId: number,
+    @Arg("value", () => Int) value: number,
+    @Ctx() { session }: MyContext
+  ): Promise<Boolean> {
+    const qr = getConnection().createQueryRunner();
+    await qr.connect();
+
+    qr.startTransaction();
+
+    try {
+      const pending: Promise<any>[] = [];
+
+      pending.push(
+        qr.manager.insert(Updoot, {
+          userId: session.userId,
+          postId,
+          value: value > 0 ? 1 : -1,
+        })
+      );
+
+      pending.push(
+        qr.manager.getRepository(Post).increment({ id: postId }, "points", 1)
+      );
+
+      await Promise.all(pending);
+
+      await qr.commitTransaction();
+
+      return true;
+    } catch (err) {
+      console.log(err);
+
+      await qr.rollbackTransaction();
+
+      return false;
+    } finally {
+      await qr.release();
+    }
   }
 
   @Query(() => PaginatedPosts)

@@ -7,8 +7,10 @@ import {
   Column,
   BaseEntity,
   ManyToOne,
+  OneToMany,
 } from "typeorm";
 import User from "./User";
+import Updoot from "./Updoot";
 
 @ObjectType()
 @Entity()
@@ -17,17 +19,13 @@ export default class Post extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Field(() => Date)
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @Field(() => Date)
-  @UpdateDateColumn()
-  updatedAt: Date;
-
   @Field()
   @Column()
   title: string;
+
+  @Field(() => Int)
+  @Column()
+  creatorId: number;
 
   @Field(() => User)
   @ManyToOne(() => User, (user) => user.posts)
@@ -35,13 +33,20 @@ export default class Post extends BaseEntity {
 
   @Field()
   @Column()
-  creatorId: number;
-
-  @Field()
-  @Column()
   content: string;
 
-  @Field()
+  @Field(() => Int)
   @Column({ default: 0 })
   points: number;
+
+  @OneToMany(() => Updoot, (updoot) => updoot.post)
+  updoots: Updoot[];
+
+  @Field(() => Date)
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @Field(() => Date)
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

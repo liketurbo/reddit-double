@@ -7,6 +7,8 @@ import {
   Ctx,
   ObjectType,
   Query,
+  FieldResolver,
+  Root,
 } from "type-graphql";
 import { MyContext } from "../types";
 import User from "../entities/User";
@@ -77,8 +79,15 @@ class ChangePasswordInput {
   newPassword: string;
 }
 
-@Resolver()
+@Resolver(User)
 export default class UserResolver {
+  @FieldResolver(() => String)
+  email(@Root() { id, email }: User, @Ctx() { session }: MyContext) {
+    if (session.userId === id) return email;
+
+    throw new Error("Not authorized");
+  }
+
   @Mutation(() => OperationResponse)
   async changePassword(
     @Arg("input", () => ChangePasswordInput)

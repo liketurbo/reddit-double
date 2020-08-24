@@ -15,6 +15,7 @@ import { createConnection } from "typeorm";
 import Post from "./entities/Post";
 import User from "./entities/User";
 import path from "path";
+import Updoot from "./entities/Updoot";
 
 const RedisStore = connectRedis(session);
 
@@ -26,7 +27,7 @@ const start = async () => {
     database: "reddit-double",
     username: "Ramzan",
     password: "postgres",
-    entities: [Post, User],
+    entities: [Post, User, Updoot],
     logging: true,
     synchronize: true,
     migrations: [path.join(__dirname, "./migrations/*.*")],
