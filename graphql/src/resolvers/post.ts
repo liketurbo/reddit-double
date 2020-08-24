@@ -11,11 +11,14 @@ import {
   FieldResolver,
   Root,
   ObjectType,
+  Info,
 } from "type-graphql";
 import Post from "../entities/Post";
 import { MyContext } from "../types";
 import isAuthenticated from "../middleware/isAuthenticated";
 import { getConnection } from "typeorm";
+import { GraphQLResolveInfo } from "graphql";
+import graphqlFields from "graphql-fields";
 
 @InputType()
 class PostInput {
@@ -45,18 +48,21 @@ export default class PostResolver {
   @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
-    @Arg("cursor", () => Date, { nullable: true }) cursor: Date | null
+    @Arg("cursor", () => Date, { nullable: true }) cursor: Date | null,
+    @Info() info: GraphQLResolveInfo
   ): Promise<PaginatedPosts> {
     limit = Math.min(50, limit) + 1;
 
     const qb = getConnection()
-      .getRepository(Post)
-      .createQueryBuilder("p")
-      .orderBy('"createdAt"', "DESC")
-      .take(limit);
+      .createQueryBuilder(Post, "p")
+      .orderBy("p.createdAt", "DESC")
+      .limit(limit);
+
+    if ("creator" in graphqlFields(info).posts)
+      qb.leftJoinAndSelect("p.creator", "c");
 
     if (cursor)
-      qb.where('"createdAt" < :cursor', {
+      qb.where('p."createdAt" < :cursor', {
         cursor,
       });
 
