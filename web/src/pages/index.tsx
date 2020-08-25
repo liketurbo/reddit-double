@@ -6,8 +6,6 @@ import {
   Heading,
   Flex,
   Divider,
-  Icon,
-  PseudoBox,
 } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import createUrqlClient from "../utils/createUrqlClient";

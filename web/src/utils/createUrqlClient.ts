@@ -15,6 +15,7 @@ import Router from "next/router";
 import gql from "graphql-tag";
 
 import { stringifyVariables } from "@urql/core";
+import { NextPageContext } from "next";
 
 export interface PaginationParams {
   offsetArgument?: string;
@@ -74,9 +75,14 @@ const createUpdateQuery = <Result, Data>(cache: Cache, result: any) => (
   cache.updateQuery({ query }, (data) => updater(result, data as any) as any);
 };
 
-const createUrqlClient = (ssrExchange: SSRExchange) => ({
+const createUrqlClient = (ssrExchange: SSRExchange, ctx?: NextPageContext) => ({
   url: "http://localhost:4000",
-  fetchOptions: { credentials: "include" } as const,
+  fetchOptions: {
+    credentials: "include",
+    headers: typeof window === "undefined" && {
+      cookie: ctx?.req?.headers.cookie,
+    },
+  } as any,
   exchanges: [
     dedupExchange,
     cacheExchange({

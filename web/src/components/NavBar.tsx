@@ -13,9 +13,7 @@ import { useMeQuery, useLogoutMutation } from "../graphql/generated/graphql";
 
 const NavBar = () => {
   const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
-  const [{ data, fetching }] = useMeQuery({
-    pause: typeof window === "undefined",
-  });
+  const [{ data, fetching }] = useMeQuery();
 
   let body = null;
 
