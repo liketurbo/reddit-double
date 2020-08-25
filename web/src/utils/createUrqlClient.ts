@@ -5,13 +5,14 @@ import {
   MeQuery,
   MeDocument,
   RegisterMutation,
-  Post,
+  VoteMutationVariables,
 } from "../graphql/generated/graphql";
 import { cacheExchange, Cache, Resolver } from "@urql/exchange-graphcache";
 import { SSRExchange } from "next-urql";
 import { pipe, tap } from "wonka";
 import { Exchange } from "urql";
 import Router from "next/router";
+import gql from "graphql-tag";
 
 import { stringifyVariables } from "@urql/core";
 
@@ -89,6 +90,42 @@ const createUrqlClient = (ssrExchange: SSRExchange) => ({
       },
       updates: {
         Mutation: {
+          vote: (_, args, cache) => {
+            const { postId, value } = args as VoteMutationVariables;
+
+            const data = cache.readFragment(
+              gql`
+                fragment _Post on Post {
+                  points
+                  voteStatus
+                }
+              `,
+              {
+                __typename: "Post",
+                id: postId,
+              }
+            );
+
+            const { points, voteStatus } = (data as any) as {
+              points: number;
+              voteStatus: number | null;
+            };
+
+            cache.writeFragment(
+              gql`
+                fragment __Post on Post {
+                  points
+                  voteStatus
+                }
+              `,
+              {
+                __typename: "Post",
+                id: postId,
+                points: points + (voteStatus ? 2 : 1) * value,
+                voteStatus: value,
+              }
+            );
+          },
           createPost: (_, __, cache) => {
             const allPostQueries = cache
               .inspectFields("Query")

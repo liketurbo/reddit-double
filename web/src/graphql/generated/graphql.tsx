@@ -47,6 +47,7 @@ export type Post = {
   creator: User;
   content: Scalars['String'];
   points: Scalars['Int'];
+  voteStatus?: Maybe<Scalars['Int']>;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
   contentSnippet: Scalars['String'];
@@ -172,7 +173,7 @@ export type OperationResponseFragment = (
 
 export type PostFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'title' | 'contentSnippet' | 'createdAt' | 'points'>
+  & Pick<Post, 'id' | 'title' | 'contentSnippet' | 'createdAt' | 'points' | 'voteStatus'>
   & { creator: (
     { __typename?: 'User' }
     & Pick<User, 'id' | 'username'>
@@ -332,6 +333,7 @@ export const PostFragmentDoc = gql`
   contentSnippet
   createdAt
   points
+  voteStatus
   creator {
     id
     username

@@ -8,9 +8,10 @@ import {
   BaseEntity,
   ManyToOne,
   OneToMany,
+  AfterLoad,
 } from "typeorm";
 import User from "./User";
-import Updoot from "./Updoot";
+import Updoot, { UpdootValue } from "./Updoot";
 
 @ObjectType()
 @Entity()
@@ -41,6 +42,10 @@ export default class Post extends BaseEntity {
 
   @OneToMany(() => Updoot, (updoot) => updoot.post)
   updoots: Updoot[];
+
+  @Field(() => Int, { nullable: true })
+  @Column({ type: "enum", enum: UpdootValue, nullable: true, select: false })
+  voteStatus: UpdootValue | null;
 
   @Field(() => Date)
   @CreateDateColumn()

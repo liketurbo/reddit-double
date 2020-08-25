@@ -4,6 +4,7 @@ fragment Post on Post {
   contentSnippet
   createdAt
   points
+  voteStatus
   creator {
     id
     username

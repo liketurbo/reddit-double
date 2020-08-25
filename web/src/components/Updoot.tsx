@@ -20,11 +20,14 @@ const Updoot = ({ post, ...rest }: UpdootProps & FlexProps) => {
       ) : (
         <PseudoBox
           onClick={() => {
+            if (post.voteStatus === 1) return;
+
             setSelect(1);
             vote({ postId: post.id, value: 1 });
           }}
-          cursor="pointer"
-          _hover={{ color: "teal.500" }}
+          color={post.voteStatus === 1 ? "tomato" : undefined}
+          cursor={post.voteStatus === 1 ? "default" : "pointer"}
+          _hover={post.voteStatus === 1 ? undefined : { color: "teal.500" }}
         >
           <Icon name="chevron-up" size="24px" />
         </PseudoBox>
@@ -35,11 +38,14 @@ const Updoot = ({ post, ...rest }: UpdootProps & FlexProps) => {
       ) : (
         <PseudoBox
           onClick={() => {
+            if (post.voteStatus === -1) return;
+
             setSelect(-1);
             vote({ postId: post.id, value: -1 });
           }}
-          cursor="pointer"
-          _hover={{ color: "teal.500" }}
+          color={post.voteStatus === -1 ? "tomato" : undefined}
+          cursor={post.voteStatus === -1 ? "default" : "pointer"}
+          _hover={post.voteStatus === -1 ? undefined : { color: "teal.500" }}
         >
           <Icon name="chevron-down" size="24px" />
         </PseudoBox>

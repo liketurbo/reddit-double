@@ -16,10 +16,10 @@ import {
 import Post from "../entities/Post";
 import { MyContext } from "../types";
 import isAuthenticated from "../middleware/isAuthenticated";
-import { getConnection, QueryRunner } from "typeorm";
+import { getConnection } from "typeorm";
 import { GraphQLResolveInfo } from "graphql";
 import graphqlFields from "graphql-fields";
-import Updoot, { UpdootValue } from "../entities/Updoot";
+import Updoot from "../entities/Updoot";
 
 @InputType()
 class PostInput {
@@ -119,7 +119,8 @@ export default class PostResolver {
   async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => Date, { nullable: true }) cursor: Date | null,
-    @Info() info: GraphQLResolveInfo
+    @Info() info: GraphQLResolveInfo,
+    @Ctx() { session }: MyContext
   ): Promise<PaginatedPosts> {
     limit = Math.min(50, limit) + 1;
 
@@ -136,7 +137,12 @@ export default class PostResolver {
         cursor,
       });
 
-    const posts = await qb.getMany();
+    if (session.userId)
+      qb.leftJoin(Updoot, "u", "u.postId = p.id AND u.userId = :userId", {
+        userId: session.userId,
+      }).addSelect("u.value", "p_voteStatus");
+
+    let posts = await qb.getMany();
 
     return {
       posts: posts.length === limit ? posts.slice(0, -1) : posts,
