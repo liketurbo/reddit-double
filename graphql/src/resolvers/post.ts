@@ -53,6 +53,12 @@ export default class PostResolver {
     @Arg("value", () => Int) value: number,
     @Ctx() { session }: MyContext
   ): Promise<Boolean> {
+    const updoot = await Updoot.findOne({
+      where: { postId, userId: session.userId },
+    });
+
+    if (updoot?.value === value) return false;
+
     const qr = getConnection().createQueryRunner();
     await qr.connect();
 
@@ -61,16 +67,36 @@ export default class PostResolver {
     try {
       const pending: Promise<any>[] = [];
 
-      pending.push(
-        qr.manager.insert(Updoot, {
-          userId: session.userId,
-          postId,
-          value: value > 0 ? 1 : -1,
-        })
-      );
+      if (updoot)
+        pending.push(
+          qr.manager.update(
+            Updoot,
+            {
+              postId,
+              userId: session.userId,
+            },
+            {
+              value: value > 0 ? 1 : -1,
+            }
+          )
+        );
+      else
+        pending.push(
+          qr.manager.insert(Updoot, {
+            userId: session.userId,
+            postId,
+            value: value > 0 ? 1 : -1,
+          })
+        );
 
       pending.push(
-        qr.manager.getRepository(Post).increment({ id: postId }, "points", 1)
+        value > 0
+          ? qr.manager
+              .getRepository(Post)
+              .increment({ id: postId }, "points", updoot ? 2 : 1)
+          : qr.manager
+              .getRepository(Post)
+              .decrement({ id: postId }, "points", updoot ? 2 : 1)
       );
 
       await Promise.all(pending);

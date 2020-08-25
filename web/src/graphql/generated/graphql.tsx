@@ -170,6 +170,15 @@ export type OperationResponseFragment = (
   )>> }
 );
 
+export type PostFragment = (
+  { __typename?: 'Post' }
+  & Pick<Post, 'id' | 'title' | 'contentSnippet' | 'createdAt' | 'points'>
+  & { creator: (
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'username'>
+  ) }
+);
+
 export type UserFragment = (
   { __typename?: 'User' }
   & Pick<User, 'id' | 'username' | 'email'>
@@ -259,6 +268,17 @@ export type RegisterMutation = (
   ) }
 );
 
+export type VoteMutationVariables = Exact<{
+  value: Scalars['Int'];
+  postId: Scalars['Int'];
+}>;
+
+
+export type VoteMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'vote'>
+);
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -286,11 +306,7 @@ export type PostsQuery = (
     & Pick<PaginatedPosts, 'hasMore'>
     & { posts: Array<(
       { __typename?: 'Post' }
-      & Pick<Post, 'id' | 'title' | 'contentSnippet' | 'createdAt'>
-      & { creator: (
-        { __typename?: 'User' }
-        & Pick<User, 'id' | 'username'>
-      ) }
+      & PostFragment
     )> }
   ) }
 );
@@ -309,6 +325,19 @@ export const OperationResponseFragmentDoc = gql`
   }
 }
     ${ErrorFragmentDoc}`;
+export const PostFragmentDoc = gql`
+    fragment Post on Post {
+  id
+  title
+  contentSnippet
+  createdAt
+  points
+  creator {
+    id
+    username
+  }
+}
+    `;
 export const UserFragmentDoc = gql`
     fragment User on User {
   id
@@ -397,6 +426,15 @@ export const RegisterDocument = gql`
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
 };
+export const VoteDocument = gql`
+    mutation Vote($value: Int!, $postId: Int!) {
+  vote(value: $value, postId: $postId)
+}
+    `;
+
+export function useVoteMutation() {
+  return Urql.useMutation<VoteMutation, VoteMutationVariables>(VoteDocument);
+};
 export const MeDocument = gql`
     query Me {
   me {
@@ -415,18 +453,11 @@ export const PostsDocument = gql`
   posts(limit: $limit, cursor: $cursor) {
     hasMore
     posts {
-      id
-      title
-      contentSnippet
-      createdAt
-      creator {
-        id
-        username
-      }
+      ...Post
     }
   }
 }
-    `;
+    ${PostFragmentDoc}`;
 
 export function usePostsQuery(options: Omit<Urql.UseQueryArgs<PostsQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<PostsQuery>({ query: PostsDocument, ...options });

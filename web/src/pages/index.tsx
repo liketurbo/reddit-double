@@ -6,6 +6,8 @@ import {
   Heading,
   Flex,
   Divider,
+  Icon,
+  PseudoBox,
 } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import createUrqlClient from "../utils/createUrqlClient";
@@ -16,6 +18,7 @@ import Link from "next/link";
 import { Link as ChakraLink } from "@chakra-ui/core";
 import ErrorPage from "next/error";
 import { useState } from "react";
+import Updoot from "../components/Updoot";
 
 const IndexPage = () => {
   const [variables, setVariables] = useState({
@@ -60,18 +63,23 @@ const IndexPage = () => {
       </Box>
       <Stack m={8} spacing={8}>
         {data.posts.posts.map((post) => (
-          <Box p={5} shadow="md" borderWidth="1px" key={post.id}>
-            <Heading isTruncated fontSize="xl">
-              {post.title}
-            </Heading>
+          <Flex p={5} shadow="md" borderWidth="1px" key={post.id}>
             <Flex>
-              <Text>Posted by </Text>
-              <Text ml={1} as="u">
-                {post.creator.username}
-              </Text>
+              <Updoot post={post} mr={5} />
             </Flex>
-            <Text mt={4}>{post.contentSnippet}</Text>
-          </Box>
+            <Box minWidth={0}>
+              <Heading isTruncated fontSize="xl">
+                {post.title}
+              </Heading>
+              <Flex>
+                <Text>Posted by </Text>
+                <Text ml={1} as="u">
+                  {post.creator.username}
+                </Text>
+              </Flex>
+              <Text mt={4}>{post.contentSnippet}</Text>
+            </Box>
+          </Flex>
         ))}
       </Stack>
       {data.posts.hasMore && (
