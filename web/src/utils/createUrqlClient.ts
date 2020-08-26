@@ -1,5 +1,5 @@
 import { DocumentNode } from "graphql";
-import { dedupExchange, fetchExchange, Query } from "urql";
+import { dedupExchange, fetchExchange } from "urql";
 import {
   LoginMutation,
   MeQuery,
@@ -75,6 +75,16 @@ const createUpdateQuery = <Result, Data>(cache: Cache, result: any) => (
   cache.updateQuery({ query }, (data) => updater(result, data as any) as any);
 };
 
+const invalidateAllPosts = (cache: Cache) => {
+  const allPostQueries = cache
+    .inspectFields("Query")
+    .filter((field) => /posts\(.+\)/.test(field.fieldKey));
+
+  allPostQueries.forEach(({ fieldKey }) => {
+    cache.invalidate("Query", fieldKey);
+  });
+};
+
 const createUrqlClient = (ssrExchange: SSRExchange, ctx?: NextPageContext) => ({
   url: "http://localhost:4000",
   fetchOptions: {
@@ -138,13 +148,7 @@ const createUrqlClient = (ssrExchange: SSRExchange, ctx?: NextPageContext) => ({
             );
           },
           createPost: (_, __, cache) => {
-            const allPostQueries = cache
-              .inspectFields("Query")
-              .filter((field) => /posts\(.+\)/.test(field.fieldKey));
-
-            allPostQueries.forEach(({ fieldKey }) => {
-              cache.invalidate("Query", fieldKey);
-            });
+            invalidateAllPosts(cache);
           },
           logout: (result, __, cache) => {
             const updateQuery = createUpdateQuery<LoginMutation, MeQuery>(
@@ -169,6 +173,8 @@ const createUrqlClient = (ssrExchange: SSRExchange, ctx?: NextPageContext) => ({
               data.me.user = result.login.user;
               return data;
             });
+
+            invalidateAllPosts(cache);
           },
           register: (result, __, cache) => {
             const updateQuery = createUpdateQuery<RegisterMutation, MeQuery>(

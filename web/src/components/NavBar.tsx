@@ -10,9 +10,13 @@ import {
 } from "@chakra-ui/core";
 import Link from "next/link";
 import { useMeQuery, useLogoutMutation } from "../graphql/generated/graphql";
+import { useRouter } from "next/router";
 
 const NavBar = () => {
+  const router = useRouter();
+
   const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
+
   const [{ data, fetching }] = useMeQuery();
 
   let body = null;
@@ -42,7 +46,14 @@ const NavBar = () => {
         />
         <Text lineHeight={1.25}>{data.me.user.username}</Text>
         <Divider orientation="vertical" />
-        <Button isLoading={logoutFetching} onClick={() => logout()} size="xs">
+        <Button
+          isLoading={logoutFetching}
+          onClick={async () => {
+            await logout();
+            router.reload();
+          }}
+          size="xs"
+        >
           Logout
         </Button>
       </Flex>
