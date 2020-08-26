@@ -66,9 +66,13 @@ const IndexPage = () => {
               <Updoot post={post} mr={5} />
             </Flex>
             <Box minWidth={0}>
-              <Heading isTruncated fontSize="xl">
-                {post.title}
-              </Heading>
+              <Link href="/post/[id]" as={`/post/${post.id}`} passHref>
+                <ChakraLink color="teal.500">
+                  <Heading isTruncated fontSize="xl">
+                    {post.title}
+                  </Heading>
+                </ChakraLink>
+              </Link>
               <Flex>
                 <Text>Posted by </Text>
                 <Text ml={1} as="u">

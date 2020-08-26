@@ -152,7 +152,13 @@ export default class PostResolver {
 
   @Query(() => Post, { nullable: true })
   async post(@Arg("id", () => Int) id: number): Promise<Post | null> {
-    return (await Post.findOne(id)) || null;
+    console.log(id);
+
+    return (
+      (await Post.findOne(id, {
+        relations: ["creator"],
+      })) || null
+    );
   }
 
   @Mutation(() => Post)
