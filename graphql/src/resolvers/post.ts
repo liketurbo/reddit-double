@@ -22,12 +22,18 @@ import graphqlFields from "graphql-fields";
 import Updoot from "../entities/Updoot";
 
 @InputType()
-class PostInput {
+class PostCreateInput {
   @Field()
   title: string;
 
   @Field()
   content: string;
+}
+
+@InputType()
+class PostUpdateInput extends PostCreateInput {
+  @Field(() => Int)
+  id: number;
 }
 
 @ObjectType()
@@ -164,24 +170,29 @@ export default class PostResolver {
   @Mutation(() => Post)
   @UseMiddleware(isAuthenticated)
   async createPost(
-    @Arg("input") input: PostInput,
+    @Arg("input") input: PostCreateInput,
     @Ctx() { session }: MyContext
   ): Promise<Post> {
     return Post.create({ ...input, creator: { id: session.userId } }).save();
   }
 
   @Mutation(() => Post, { nullable: true })
+  @UseMiddleware(isAuthenticated)
   async updatePost(
-    @Arg("id", () => Int) id: number,
-    @Arg("title") title: string
+    @Arg("input") { id, title, content }: PostUpdateInput,
+    @Ctx() { session }: MyContext
   ): Promise<Post | null> {
-    const post = await Post.findOne(id);
+    const result = await getConnection()
+      .createQueryBuilder()
+      .update(Post, { title, content })
+      .where("id = :id AND creatorId = :userId", {
+        id,
+        userId: session.userId,
+      })
+      .returning("*")
+      .execute();
 
-    if (!post) return null;
-
-    await Post.update({ id }, { title });
-
-    return post;
+    return result.raw[0];
   }
 
   @Mutation(() => Boolean)

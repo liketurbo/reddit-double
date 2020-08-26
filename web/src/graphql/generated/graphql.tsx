@@ -96,13 +96,12 @@ export type MutationVoteArgs = {
 
 
 export type MutationCreatePostArgs = {
-  input: PostInput;
+  input: PostCreateInput;
 };
 
 
 export type MutationUpdatePostArgs = {
-  title: Scalars['String'];
-  id: Scalars['Int'];
+  input: PostUpdateInput;
 };
 
 
@@ -130,9 +129,15 @@ export type MutationLoginArgs = {
   input: LoginInput;
 };
 
-export type PostInput = {
+export type PostCreateInput = {
   title: Scalars['String'];
   content: Scalars['String'];
+};
+
+export type PostUpdateInput = {
+  title: Scalars['String'];
+  content: Scalars['String'];
+  id: Scalars['Int'];
 };
 
 export type OperationResponse = {
@@ -173,7 +178,7 @@ export type OperationResponseFragment = (
 
 export type PostFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'title' | 'contentSnippet' | 'createdAt' | 'points' | 'voteStatus'>
+  & Pick<Post, 'id' | 'title' | 'createdAt' | 'points' | 'voteStatus'>
   & { creator: (
     { __typename?: 'User' }
     & Pick<User, 'id' | 'username'>
@@ -210,7 +215,7 @@ export type ChangePasswordMutation = (
 );
 
 export type CreatePostMutationVariables = Exact<{
-  input: PostInput;
+  input: PostCreateInput;
 }>;
 
 
@@ -279,6 +284,19 @@ export type RemovePostMutation = (
   & Pick<Mutation, 'removePost'>
 );
 
+export type UpdatePostMutationVariables = Exact<{
+  input: PostUpdateInput;
+}>;
+
+
+export type UpdatePostMutation = (
+  { __typename?: 'Mutation' }
+  & { updatePost?: Maybe<(
+    { __typename?: 'Post' }
+    & Pick<Post, 'id' | 'title' | 'content' | 'contentSnippet'>
+  )> }
+);
+
 export type VoteMutationVariables = Exact<{
   value: Scalars['Int'];
   postId: Scalars['Int'];
@@ -313,11 +331,8 @@ export type PostQuery = (
   { __typename?: 'Query' }
   & { post?: Maybe<(
     { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'title' | 'content' | 'createdAt' | 'points' | 'voteStatus'>
-    & { creator: (
-      { __typename?: 'User' }
-      & Pick<User, 'id' | 'username'>
-    ) }
+    & Pick<Post, 'content'>
+    & PostFragment
   )> }
 );
 
@@ -334,6 +349,7 @@ export type PostsQuery = (
     & Pick<PaginatedPosts, 'hasMore'>
     & { posts: Array<(
       { __typename?: 'Post' }
+      & Pick<Post, 'contentSnippet'>
       & PostFragment
     )> }
   ) }
@@ -357,7 +373,6 @@ export const PostFragmentDoc = gql`
     fragment Post on Post {
   id
   title
-  contentSnippet
   createdAt
   points
   voteStatus
@@ -397,7 +412,7 @@ export function useChangePasswordMutation() {
   return Urql.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument);
 };
 export const CreatePostDocument = gql`
-    mutation CreatePost($input: PostInput!) {
+    mutation CreatePost($input: PostCreateInput!) {
   createPost(input: $input) {
     id
     createdAt
@@ -464,6 +479,20 @@ export const RemovePostDocument = gql`
 export function useRemovePostMutation() {
   return Urql.useMutation<RemovePostMutation, RemovePostMutationVariables>(RemovePostDocument);
 };
+export const UpdatePostDocument = gql`
+    mutation UpdatePost($input: PostUpdateInput!) {
+  updatePost(input: $input) {
+    id
+    title
+    content
+    contentSnippet
+  }
+}
+    `;
+
+export function useUpdatePostMutation() {
+  return Urql.useMutation<UpdatePostMutation, UpdatePostMutationVariables>(UpdatePostDocument);
+};
 export const VoteDocument = gql`
     mutation Vote($value: Int!, $postId: Int!) {
   vote(value: $value, postId: $postId)
@@ -489,19 +518,11 @@ export function useMeQuery(options: Omit<Urql.UseQueryArgs<MeQueryVariables>, 'q
 export const PostDocument = gql`
     query Post($id: Int!) {
   post(id: $id) {
-    id
-    title
+    ...Post
     content
-    createdAt
-    points
-    voteStatus
-    creator {
-      id
-      username
-    }
   }
 }
-    `;
+    ${PostFragmentDoc}`;
 
 export function usePostQuery(options: Omit<Urql.UseQueryArgs<PostQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<PostQuery>({ query: PostDocument, ...options });
@@ -512,6 +533,7 @@ export const PostsDocument = gql`
     hasMore
     posts {
       ...Post
+      contentSnippet
     }
   }
 }

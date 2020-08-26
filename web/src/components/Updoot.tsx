@@ -25,9 +25,9 @@ const Updoot = ({ post, ...rest }: UpdootProps & FlexProps) => {
             setSelect(1);
             vote({ postId: post.id, value: 1 });
           }}
-          color={post.voteStatus === 1 ? "tomato" : undefined}
+          color={post.voteStatus === 1 ? "black" : "gray.400"}
           cursor={post.voteStatus === 1 ? "default" : "pointer"}
-          _hover={post.voteStatus === 1 ? undefined : { color: "teal.500" }}
+          _hover={post.voteStatus === 1 ? undefined : { color: "tomato" }}
         >
           <Icon name="chevron-up" size="24px" />
         </PseudoBox>
@@ -43,9 +43,9 @@ const Updoot = ({ post, ...rest }: UpdootProps & FlexProps) => {
             setSelect(-1);
             vote({ postId: post.id, value: -1 });
           }}
-          color={post.voteStatus === -1 ? "tomato" : undefined}
+          color={post.voteStatus === -1 ? "black" : "gray.400"}
           cursor={post.voteStatus === -1 ? "default" : "pointer"}
-          _hover={post.voteStatus === -1 ? undefined : { color: "teal.500" }}
+          _hover={post.voteStatus === -1 ? undefined : { color: "tomato" }}
         >
           <Icon name="chevron-down" size="24px" />
         </PseudoBox>

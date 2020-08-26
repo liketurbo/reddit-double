@@ -1,7 +1,6 @@
 fragment Post on Post {
   id
   title
-  contentSnippet
   createdAt
   points
   voteStatus

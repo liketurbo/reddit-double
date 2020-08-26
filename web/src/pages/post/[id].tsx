@@ -6,26 +6,21 @@ import { usePostQuery } from "../../graphql/generated/graphql";
 import ErrorPage from "next/error";
 import { Text, Heading, Box, Spinner } from "@chakra-ui/core";
 import NavBar from "../../components/NavBar";
+import usePostFromUrl from "../../hooks/usePostFromUrl";
 
 const PostPage = () => {
-  const router = useRouter();
-
-  if (!router.query.id) return <ErrorPage statusCode={404} />;
-
-  const [{ data, fetching }] = usePostQuery({
-    variables: { id: +router.query.id },
-  });
+  const { data, fetching } = usePostFromUrl();
 
   if (fetching) return <Spinner />;
 
-  if (!data || !data.post) return <ErrorPage statusCode={404} />;
+  if (!data) return <ErrorPage statusCode={404} />;
 
   return (
     <>
       <NavBar />
       <Box m={8}>
-        <Heading>{data.post.title}</Heading>
-        <Text>{data.post.content}</Text>
+        <Heading>{data.title}</Heading>
+        <Text>{data.content}</Text>
       </Box>
     </>
   );

@@ -1,17 +1,14 @@
-import React, { useEffect } from "react";
-import Container from "../components/Container";
-import NavBar from "../components/NavBar";
+import React from "react";
+import Container from "../../components/Container";
+import NavBar from "../../components/NavBar";
 import { Formik, Form } from "formik";
-import TextField from "../components/TextField";
+import TextField from "../../components/TextField";
 import { Button } from "@chakra-ui/core";
-import {
-  useCreatePostMutation,
-  useMeQuery,
-} from "../graphql/generated/graphql";
+import { useCreatePostMutation } from "../../graphql/generated/graphql";
 import { withUrqlClient } from "next-urql";
-import createUrqlClient from "../utils/createUrqlClient";
+import createUrqlClient from "../../utils/createUrqlClient";
 import { useRouter } from "next/router";
-import useAuthenticated from "../utils/useAuthenticated";
+import useAuthenticated from "../../hooks/useAuthenticated";
 
 const CreatePostPage = () => {
   const router = useRouter();

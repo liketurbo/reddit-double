@@ -61,7 +61,7 @@ const IndexPage = () => {
               <MenuItem>Acs date</MenuItem>
             </MenuList>
           </Menu>
-          <Link href="/create-post" passHref>
+          <Link href="/post/create" passHref>
             <ChakraLink ml="auto" color="teal.500">
               Create post
             </ChakraLink>
@@ -87,14 +87,28 @@ const IndexPage = () => {
                     </ChakraLink>
                   </Link>
                   {meData?.me.user?.id === post.creator.id && (
-                    <PseudoBox
-                      ml={5}
-                      cursor="pointer"
-                      _hover={{ color: "red.500" }}
-                      onClick={() => removePost({ id: post.id })}
-                    >
-                      <Icon name="delete" />
-                    </PseudoBox>
+                    <Flex ml={5}>
+                      <Link
+                        href="/post/[id]/edit"
+                        as={`/post/${post.id}/edit`}
+                        passHref
+                      >
+                        <PseudoBox
+                          cursor="pointer"
+                          _hover={{ color: "teal.500" }}
+                        >
+                          <Icon name="edit" />
+                        </PseudoBox>
+                      </Link>
+                      <PseudoBox
+                        ml={2}
+                        cursor="pointer"
+                        _hover={{ color: "red.500" }}
+                        onClick={() => removePost({ id: post.id })}
+                      >
+                        <Icon name="delete" />
+                      </PseudoBox>
+                    </Flex>
                   )}
                 </Flex>
                 <Flex>
