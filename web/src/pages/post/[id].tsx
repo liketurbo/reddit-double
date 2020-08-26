@@ -7,6 +7,7 @@ import ErrorPage from "next/error";
 import { Text, Heading, Box, Spinner } from "@chakra-ui/core";
 import NavBar from "../../components/NavBar";
 import usePostFromUrl from "../../hooks/usePostFromUrl";
+import ControlButtons from "../../components/ControlButtons";
 
 const PostPage = () => {
   const { data, fetching } = usePostFromUrl();
@@ -19,6 +20,7 @@ const PostPage = () => {
     <>
       <NavBar />
       <Box m={8}>
+        <ControlButtons id={data.id} mb={5} />
         <Heading>{data.title}</Heading>
         <Text>{data.content}</Text>
       </Box>

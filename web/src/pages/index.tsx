@@ -23,6 +23,7 @@ import { Link as ChakraLink } from "@chakra-ui/core";
 import ErrorPage from "next/error";
 import { useState } from "react";
 import Updoot from "../components/Updoot";
+import ControlButtons from "../components/ControlButtons";
 
 const IndexPage = () => {
   const [variables, setVariables] = useState({
@@ -87,28 +88,7 @@ const IndexPage = () => {
                     </ChakraLink>
                   </Link>
                   {meData?.me.user?.id === post.creator.id && (
-                    <Flex ml={5}>
-                      <Link
-                        href="/post/[id]/edit"
-                        as={`/post/${post.id}/edit`}
-                        passHref
-                      >
-                        <PseudoBox
-                          cursor="pointer"
-                          _hover={{ color: "teal.500" }}
-                        >
-                          <Icon name="edit" />
-                        </PseudoBox>
-                      </Link>
-                      <PseudoBox
-                        ml={2}
-                        cursor="pointer"
-                        _hover={{ color: "red.500" }}
-                        onClick={() => removePost({ id: post.id })}
-                      >
-                        <Icon name="delete" />
-                      </PseudoBox>
-                    </Flex>
+                    <ControlButtons id={post.id} ml={5} />
                   )}
                 </Flex>
                 <Flex>
