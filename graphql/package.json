@@ -8,7 +8,8 @@
   "scripts": {
     "dev:watch": "tsc -w",
     "dev:run": "nodemon dist/index.js",
-    "dev": "yarn dev:watch | yarn dev:run"
+    "dev": "yarn dev:watch | yarn dev:run",
+    "env:gen": "yarn gen-env-types .env -o src/env.d.ts -e ."
   },
   "devDependencies": {
     "@types/connect-redis": "^0.0.14",
@@ -20,6 +21,7 @@
     "@types/nodemailer": "^6.4.0",
     "@types/redis": "^2.8.25",
     "@types/uuid": "^8.3.0",
+    "gen-env-types": "^1.0.3",
     "nodemon": "^2.0.4",
     "ts-node": "^8.10.2",
     "typescript": "^4.0.2"
@@ -29,6 +31,7 @@
     "argon2": "^0.27.0",
     "connect-redis": "^5.0.0",
     "dataloader": "^2.0.0",
+    "dotenv-example": "^1.0.4",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "graphql": "^15.3.0",

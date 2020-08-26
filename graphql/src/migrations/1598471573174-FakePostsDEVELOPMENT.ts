@@ -1,6 +1,6 @@
 import { QueryRunner } from "typeorm";
 
-export class FakePosts1598209511820 {
+export class FakePostsDEVELOPMENT1598471573174 {
   public async up(queryRunner: QueryRunner): Promise<void> {
     queryRunner.query(
       `insert into post (title, content, "creatorId", "createdAt", "updatedAt") values ('Proin leo odio, porttitor id, consequat in, consequat ut, nulla. Sed accumsan felis. Ut at dolor quis odio consequat varius.', 'Proin eu mi. Nulla ac enim. In tempor, turpis nec euismod scelerisque, quam turpis adipiscing lorem, vitae mattis nibh ligula nec sem.

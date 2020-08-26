@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import "dotenv/config";
 import { PRODUCTION } from "./constants";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
@@ -21,18 +22,21 @@ import createUpdootValueLoader from "./loaders/createUpdootValueLoader";
 
 const RedisStore = connectRedis(session);
 
-const redisClient = new Redis();
+const redisClient = new Redis(process.env.REDIS_URL);
 
 const start = async () => {
   const con = await createConnection({
     type: "postgres",
-    database: "reddit-double",
-    username: "Ramzan",
-    password: "postgres",
     entities: [Post, User, Updoot],
     logging: true,
-    synchronize: true,
-    migrations: [path.join(__dirname, "./migrations/*.*")],
+    synchronize: !PRODUCTION,
+    migrations: [
+      path.join(
+        __dirname,
+        `./migrations/*${PRODUCTION ? "PRODUCTION" : "DEVELOPMENT"}.*`
+      ),
+    ],
+    url: process.env.DATABASE_URL,
   });
 
   await con.runMigrations();
@@ -43,13 +47,14 @@ const start = async () => {
     session({
       name: "sid",
       store: new RedisStore({ client: redisClient, disableTouch: true }),
-      secret: "keyboard cat",
+      secret: process.env.SESSION_SECRET,
       resave: false,
       cookie: {
         maxAge: ms("10y"),
         httpOnly: true,
         secure: PRODUCTION,
         sameSite: "lax",
+        domain: PRODUCTION ? ".10mem.ru" : undefined,
       },
       saveUninitialized: false,
     })
@@ -74,13 +79,13 @@ const start = async () => {
     app,
     path: "/",
     cors: {
-      origin: "http://localhost:1234",
+      origin: process.env.CORS_ORIGIN,
       credentials: true,
       maxAge: ms("1d"),
     },
   });
 
-  app.listen({ port: 4000 }, () => {
+  app.listen(+process.env.PORT, () => {
     console.log(`Server ready at http://localhost:4000${server.graphqlPath}`);
   });
 };

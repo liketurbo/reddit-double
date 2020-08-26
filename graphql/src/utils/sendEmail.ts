@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import Redis from "ioredis";
 
-const redisClient = new Redis();
+const redisClient = new Redis(process.env.REDIS_URL);
 
 // async..await is not allowed in global scope, must use a wrapper
 const sendEmail = async (to: string, html: string) => {
