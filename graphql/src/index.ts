@@ -17,6 +17,7 @@ import User from "./entities/User";
 import path from "path";
 import Updoot from "./entities/Updoot";
 import createUserLoader from "./loaders/createUserLoader";
+import createUpdootValueLoader from "./loaders/createUpdootValueLoader";
 
 const RedisStore = connectRedis(session);
 
@@ -62,7 +63,10 @@ const start = async () => {
     context: ({ req }): MyContext => ({
       session: req.session as Express.Session,
       redis: redisClient,
-      loaders: [createUserLoader()],
+      loaders: {
+        UserLoader: createUserLoader(),
+        UpdootValueLoader: createUpdootValueLoader(req.session?.userId),
+      },
     }),
   });
 

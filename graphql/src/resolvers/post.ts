@@ -52,7 +52,15 @@ export default class PostResolver {
 
   @FieldResolver(() => User)
   creator(@Root() root: Post, @Ctx() { loaders }: MyContext): Promise<User> {
-    return loaders[0].load(root.creatorId);
+    return loaders.UserLoader.load(root.creatorId);
+  }
+
+  @FieldResolver(() => Int, { nullable: true })
+  voteStatus(
+    @Root() root: Post,
+    @Ctx() { loaders }: MyContext
+  ): Promise<Number | null> {
+    return loaders.UpdootValueLoader.load(root.id);
   }
 
   @Mutation(() => Boolean)
@@ -127,8 +135,7 @@ export default class PostResolver {
   @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
-    @Arg("cursor", () => Date, { nullable: true }) cursor: Date | null,
-    @Ctx() { session }: MyContext
+    @Arg("cursor", () => Date, { nullable: true }) cursor: Date | null
   ): Promise<PaginatedPosts> {
     limit = Math.min(50, limit) + 1;
 
@@ -141,11 +148,6 @@ export default class PostResolver {
       qb.where('p."createdAt" < :cursor', {
         cursor,
       });
-
-    if (session.userId)
-      qb.leftJoin(Updoot, "u", "u.postId = p.id AND u.userId = :userId", {
-        userId: session.userId,
-      }).addSelect("u.value", "p_voteStatus");
 
     let posts = await qb.getMany();
 

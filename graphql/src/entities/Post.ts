@@ -8,7 +8,6 @@ import {
   BaseEntity,
   ManyToOne,
   OneToMany,
-  AfterLoad,
 } from "typeorm";
 import User from "./User";
 import Updoot, { UpdootValue } from "./Updoot";
@@ -44,7 +43,6 @@ export default class Post extends BaseEntity {
   updoots: Updoot[];
 
   @Field(() => Int, { nullable: true })
-  @Column({ type: "enum", enum: UpdootValue, nullable: true, select: false })
   voteStatus: UpdootValue | null;
 
   @Field(() => Date)
