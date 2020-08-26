@@ -269,6 +269,16 @@ export type RegisterMutation = (
   ) }
 );
 
+export type RemovePostMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type RemovePostMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'removePost'>
+);
+
 export type VoteMutationVariables = Exact<{
   value: Scalars['Int'];
   postId: Scalars['Int'];
@@ -444,6 +454,15 @@ export const RegisterDocument = gql`
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
+};
+export const RemovePostDocument = gql`
+    mutation RemovePost($id: Int!) {
+  removePost(id: $id)
+}
+    `;
+
+export function useRemovePostMutation() {
+  return Urql.useMutation<RemovePostMutation, RemovePostMutationVariables>(RemovePostDocument);
 };
 export const VoteDocument = gql`
     mutation Vote($value: Int!, $postId: Int!) {

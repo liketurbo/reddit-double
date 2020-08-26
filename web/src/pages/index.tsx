@@ -6,10 +6,16 @@ import {
   Heading,
   Flex,
   Divider,
+  Icon,
+  PseudoBox,
 } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import createUrqlClient from "../utils/createUrqlClient";
-import { usePostsQuery } from "../graphql/generated/graphql";
+import {
+  usePostsQuery,
+  useRemovePostMutation,
+  useMeQuery,
+} from "../graphql/generated/graphql";
 import NavBar from "../components/NavBar";
 import { Menu, MenuButton, MenuList, MenuItem, Button } from "@chakra-ui/core";
 import Link from "next/link";
@@ -24,13 +30,17 @@ const IndexPage = () => {
     cursor: null as string | null,
   });
 
-  const [{ data, fetching, error }] = usePostsQuery({
+  const [{ data: postsData, fetching, error }] = usePostsQuery({
     variables,
   });
 
-  if (!data && fetching) return <Spinner />;
+  const [, removePost] = useRemovePostMutation();
 
-  if (!data) return <ErrorPage statusCode={500} title={error?.message} />;
+  const [{ data: meData }] = useMeQuery();
+
+  if (!postsData && fetching) return <Spinner />;
+
+  if (!postsData) return <ErrorPage statusCode={500} title={error?.message} />;
 
   return (
     <>
@@ -60,37 +70,53 @@ const IndexPage = () => {
         <Divider m={0} />
       </Box>
       <Stack m={8} spacing={8}>
-        {data.posts.posts.map((post) => (
-          <Flex p={5} shadow="md" borderWidth="1px" key={post.id}>
-            <Flex>
-              <Updoot post={post} mr={5} />
-            </Flex>
-            <Box minWidth={0}>
-              <Link href="/post/[id]" as={`/post/${post.id}`} passHref>
-                <ChakraLink color="teal.500">
-                  <Heading isTruncated fontSize="xl">
-                    {post.title}
-                  </Heading>
-                </ChakraLink>
-              </Link>
+        {postsData.posts.posts
+          .filter((post) => post)
+          .map((post) => (
+            <Flex p={5} shadow="md" borderWidth="1px" key={post.id}>
               <Flex>
-                <Text>Posted by </Text>
-                <Text ml={1} as="u">
-                  {post.creator.username}
-                </Text>
+                <Updoot post={post} mr={5} />
               </Flex>
-              <Text mt={4}>{post.contentSnippet}</Text>
-            </Box>
-          </Flex>
-        ))}
+              <Box flex={1} minWidth={0}>
+                <Flex justify="space-between" alignItems="center">
+                  <Link href="/post/[id]" as={`/post/${post.id}`} passHref>
+                    <ChakraLink minWidth={0} color="teal.500">
+                      <Heading isTruncated fontSize="xl">
+                        {post.title}
+                      </Heading>
+                    </ChakraLink>
+                  </Link>
+                  {meData?.me.user?.id === post.creator.id && (
+                    <PseudoBox
+                      ml={5}
+                      cursor="pointer"
+                      _hover={{ color: "red.500" }}
+                      onClick={() => removePost({ id: post.id })}
+                    >
+                      <Icon name="delete" />
+                    </PseudoBox>
+                  )}
+                </Flex>
+                <Flex>
+                  <Text>Posted by </Text>
+                  <Text ml={1} as="u">
+                    {post.creator.username}
+                  </Text>
+                </Flex>
+                <Text mt={4}>{post.contentSnippet}</Text>
+              </Box>
+            </Flex>
+          ))}
       </Stack>
-      {data.posts.hasMore && (
+      {postsData.posts.hasMore && (
         <Flex justify="center" mb={16}>
           <Button
             onClick={() =>
               setVariables({
                 limit: variables.limit,
-                cursor: data.posts.posts[data.posts.posts.length - 1].createdAt,
+                cursor:
+                  postsData.posts.posts[postsData.posts.posts.length - 1]
+                    .createdAt,
               })
             }
             isLoading={fetching}

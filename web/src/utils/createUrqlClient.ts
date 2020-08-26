@@ -96,6 +96,11 @@ const createUrqlClient = (ssrExchange: SSRExchange, ctx?: NextPageContext) => ({
       },
       updates: {
         Mutation: {
+          removePost: (root, args, cache) => {
+            if (!root.removePost) return;
+
+            cache.invalidate({ __typename: "Post", id: args.id as number });
+          },
           vote: (_, args, cache) => {
             const { postId, value } = args as VoteMutationVariables;
 

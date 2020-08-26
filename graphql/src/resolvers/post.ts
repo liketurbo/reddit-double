@@ -185,7 +185,13 @@ export default class PostResolver {
   }
 
   @Mutation(() => Boolean)
-  async removePost(@Arg("id", () => Int) id: number): Promise<Boolean> {
-    return (await Post.delete(id)).affected === 1;
+  @UseMiddleware(isAuthenticated)
+  async removePost(
+    @Arg("id", () => Int) id: number,
+    @Ctx() { session }: MyContext
+  ): Promise<Boolean> {
+    return (
+      (await Post.delete({ id, creatorId: session.userId })).affected === 1
+    );
   }
 }
