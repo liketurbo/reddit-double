@@ -11,15 +11,13 @@ import {
   FieldResolver,
   Root,
   ObjectType,
-  Info,
 } from "type-graphql";
 import Post from "../entities/Post";
 import { MyContext } from "../types";
 import isAuthenticated from "../middleware/isAuthenticated";
 import { getConnection } from "typeorm";
-import { GraphQLResolveInfo } from "graphql";
-import graphqlFields from "graphql-fields";
 import Updoot from "../entities/Updoot";
+import User from "../entities/User";
 
 @InputType()
 class PostCreateInput {
@@ -50,6 +48,11 @@ export default class PostResolver {
   @FieldResolver(() => String)
   contentSnippet(@Root() root: Post): String {
     return root.content.slice(0, 150);
+  }
+
+  @FieldResolver(() => User)
+  creator(@Root() root: Post, @Ctx() { loaders }: MyContext): Promise<User> {
+    return loaders[0].load(root.creatorId);
   }
 
   @Mutation(() => Boolean)
@@ -125,7 +128,6 @@ export default class PostResolver {
   async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => Date, { nullable: true }) cursor: Date | null,
-    @Info() info: GraphQLResolveInfo,
     @Ctx() { session }: MyContext
   ): Promise<PaginatedPosts> {
     limit = Math.min(50, limit) + 1;
@@ -134,9 +136,6 @@ export default class PostResolver {
       .createQueryBuilder(Post, "p")
       .orderBy("p.createdAt", "DESC")
       .limit(limit);
-
-    if ("creator" in graphqlFields(info).posts)
-      qb.leftJoinAndSelect("p.creator", "c");
 
     if (cursor)
       qb.where('p."createdAt" < :cursor', {
@@ -160,11 +159,7 @@ export default class PostResolver {
   async post(@Arg("id", () => Int) id: number): Promise<Post | null> {
     console.log(id);
 
-    return (
-      (await Post.findOne(id, {
-        relations: ["creator"],
-      })) || null
-    );
+    return (await Post.findOne(id)) || null;
   }
 
   @Mutation(() => Post)
