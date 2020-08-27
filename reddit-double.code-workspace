@@ -1,11 +1,14 @@
 {
   "folders": [
-	{
-		"path": "graphql"
-	},
-	{
-		"path": "web"
-	}
-],
+    {
+      "path": "graphql"
+    },
+    {
+      "path": "web"
+    },
+    {
+      "path": "."
+    }
+  ],
   "settings": {}
 }
