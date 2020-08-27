@@ -80,7 +80,7 @@ const RegisterPage = () => {
                 isLoading={props.isSubmitting}
                 type="submit"
               >
-                Reset password
+                Register
               </Button>
             </Form>
           )}
