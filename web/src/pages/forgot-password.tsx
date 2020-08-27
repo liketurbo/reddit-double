@@ -6,6 +6,7 @@ import NavBar from "../components/NavBar";
 import TextField from "../components/TextField";
 import { useForgotPasswordMutation } from "../graphql/generated/graphql";
 import toErrorMap from "../utils/toErrorMap";
+import withApollo from "../utils/withApollo";
 
 const ForgotPasswordPage = () => {
   const [complete, setComplete] = useState(false);
@@ -60,4 +61,4 @@ const ForgotPasswordPage = () => {
   );
 };
 
-export default ForgotPasswordPage;
+export default withApollo({ ssr: true })(ForgotPasswordPage);

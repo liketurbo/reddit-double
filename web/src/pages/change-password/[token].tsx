@@ -17,6 +17,7 @@ import NavBar from "../../components/NavBar";
 import TextField from "../../components/TextField";
 import { useChangePasswordMutation } from "../../graphql/generated/graphql";
 import toErrorMap from "../../utils/toErrorMap";
+import withApollo from "../../utils/withApollo";
 
 const ChangePasswordPage = () => {
   const [changePassword] = useChangePasswordMutation();
@@ -114,4 +115,4 @@ const ChangePasswordPage = () => {
   );
 };
 
-export default ChangePasswordPage;
+export default withApollo({ ssr: true })(ChangePasswordPage);

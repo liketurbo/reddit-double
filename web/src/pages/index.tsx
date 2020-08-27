@@ -15,11 +15,11 @@ import {
 } from "@chakra-ui/core";
 import ErrorPage from "next/error";
 import Link from "next/link";
-import { useState } from "react";
 import ControlButtons from "../components/ControlButtons";
 import NavBar from "../components/NavBar";
 import Updoot from "../components/Updoot";
 import { useMeQuery, usePostsQuery } from "../graphql/generated/graphql";
+import withApollo from "../utils/withApollo";
 
 const IndexPage = () => {
   const {
@@ -124,4 +124,4 @@ const IndexPage = () => {
   );
 };
 
-export default IndexPage;
+export default withApollo({ ssr: true })(IndexPage);

@@ -8,11 +8,12 @@ import NavBar from "../../../components/NavBar";
 import TextField from "../../../components/TextField";
 import { useUpdatePostMutation } from "../../../graphql/generated/graphql";
 import usePostFromUrl from "../../../hooks/usePostFromUrl";
+import withApollo from "../../../utils/withApollo";
 
 const EditPostPage = () => {
   const [updatePost] = useUpdatePostMutation();
 
-  const { data, fetching } = usePostFromUrl();
+  const { data, loading: fetching } = usePostFromUrl();
 
   const router = useRouter();
 
@@ -65,4 +66,4 @@ const EditPostPage = () => {
   );
 };
 
-export default EditPostPage;
+export default withApollo({ ssr: true })(EditPostPage);

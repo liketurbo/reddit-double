@@ -6,8 +6,31 @@ import React from "react";
 import Container from "../components/Container";
 import NavBar from "../components/NavBar";
 import TextField from "../components/TextField";
-import { useLoginMutation } from "../graphql/generated/graphql";
+import {
+  useLoginMutation,
+  MeDocument,
+  LoginMutation,
+} from "../graphql/generated/graphql";
 import toErrorMap from "../utils/toErrorMap";
+import withApollo from "../utils/withApollo";
+import { ApolloCache, FetchResult } from "@apollo/client";
+
+const updateAfterLogin = (
+  cache: ApolloCache<LoginMutation>,
+  fetchResult: FetchResult<LoginMutation>
+) => {
+  if (!fetchResult.data?.login.user) return;
+
+  cache.writeQuery({
+    query: MeDocument,
+    data: {
+      __typename: "Query",
+      me: fetchResult.data.login.user,
+    },
+  });
+
+  cache.evict({ fieldName: "posts" });
+};
 
 const LoginPage = () => {
   const [login] = useLoginMutation();
@@ -25,6 +48,7 @@ const LoginPage = () => {
               variables: {
                 input: values,
               },
+              update: updateAfterLogin,
             });
 
             if (res.data?.login.errors?.length) {
@@ -72,4 +96,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default withApollo({ ssr: true })(LoginPage);

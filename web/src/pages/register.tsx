@@ -5,8 +5,29 @@ import React from "react";
 import Container from "../components/Container";
 import NavBar from "../components/NavBar";
 import TextField from "../components/TextField";
-import { useRegisterMutation } from "../graphql/generated/graphql";
+import {
+  useRegisterMutation,
+  RegisterMutation,
+  MeDocument,
+} from "../graphql/generated/graphql";
 import toErrorMap from "../utils/toErrorMap";
+import withApollo from "../utils/withApollo";
+import { ApolloCache, FetchResult } from "@apollo/client";
+
+const updateAfterRegister = (
+  cache: ApolloCache<RegisterMutation>,
+  fetchResult: FetchResult<RegisterMutation>
+) => {
+  if (!fetchResult.data?.register.user) return;
+
+  cache.writeQuery({
+    query: MeDocument,
+    data: {
+      __typename: "Query",
+      me: fetchResult.data.register.user,
+    },
+  });
+};
 
 const RegisterPage = () => {
   const [register] = useRegisterMutation();
@@ -38,6 +59,7 @@ const RegisterPage = () => {
                   email: values.email,
                 },
               },
+              update: updateAfterRegister,
             });
 
             if (res.data?.register.errors?.length) {
@@ -90,4 +112,4 @@ const RegisterPage = () => {
   );
 };
 
-export default RegisterPage;
+export default withApollo({ ssr: true })(RegisterPage);

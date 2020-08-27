@@ -7,7 +7,7 @@ const usePostFromUrl = () => {
   if (typeof router.query.id !== "string")
     return {
       data: null,
-      fetching: false,
+      loading: false,
       error: { message: "Post's id not provided" },
     };
 
@@ -15,14 +15,14 @@ const usePostFromUrl = () => {
     variables: { id: +router.query.id },
   });
 
-  if (loading) return { data: null, fetching: true, error: null };
+  if (loading) return { data: null, loading: true, error: null };
 
   if (data && data.post)
-    return { data: data.post, fetching: false, error: null };
+    return { data: data.post, loading: false, error: null };
   else
     return {
       data: null,
-      fetching: false,
+      loading: false,
       error: { message: "Post does not exist" },
     };
 };

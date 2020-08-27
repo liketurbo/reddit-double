@@ -5,8 +5,17 @@ import React from "react";
 import Container from "../../components/Container";
 import NavBar from "../../components/NavBar";
 import TextField from "../../components/TextField";
-import { useCreatePostMutation } from "../../graphql/generated/graphql";
+import {
+  useCreatePostMutation,
+  CreatePostMutation,
+} from "../../graphql/generated/graphql";
 import useAuthenticated from "../../hooks/useAuthenticated";
+import withApollo from "../../utils/withApollo";
+import { ApolloCache } from "@apollo/client";
+
+const updateAfterCreatePost = (cache: ApolloCache<CreatePostMutation>) => {
+  cache.evict({ fieldName: "posts" });
+};
 
 const CreatePostPage = () => {
   const router = useRouter();
@@ -26,6 +35,7 @@ const CreatePostPage = () => {
               variables: {
                 input: values,
               },
+              update: updateAfterCreatePost,
             });
 
             if (!errors?.length) router.push("/");
@@ -60,4 +70,4 @@ const CreatePostPage = () => {
   );
 };
 
-export default CreatePostPage;
+export default withApollo({ ssr: true })(CreatePostPage);

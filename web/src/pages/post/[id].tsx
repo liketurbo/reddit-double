@@ -4,24 +4,30 @@ import React from "react";
 import ControlButtons from "../../components/ControlButtons";
 import NavBar from "../../components/NavBar";
 import usePostFromUrl from "../../hooks/usePostFromUrl";
+import withApollo from "../../utils/withApollo";
+import { useMeQuery } from "../../graphql/generated/graphql";
 
 const PostPage = () => {
-  const { data, fetching } = usePostFromUrl();
+  const { data: postData, loading: postLoading } = usePostFromUrl();
 
-  if (fetching) return <Spinner />;
+  const { data: meData, loading: meLoading } = useMeQuery();
 
-  if (!data) return <ErrorPage statusCode={404} />;
+  if (postLoading || meLoading) return <Spinner />;
+
+  if (!postData || !meData) return <ErrorPage statusCode={404} />;
 
   return (
     <>
       <NavBar />
       <Box m={8}>
-        <ControlButtons id={data.id} mb={5} />
-        <Heading>{data.title}</Heading>
-        <Text>{data.content}</Text>
+        {postData.creator.id === meData.me.user?.id && (
+          <ControlButtons id={postData.id} mb={5} />
+        )}
+        <Heading>{postData.title}</Heading>
+        <Text>{postData.content}</Text>
       </Box>
     </>
   );
 };
 
-export default PostPage;
+export default withApollo({ ssr: true })(PostPage);

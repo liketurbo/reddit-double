@@ -7,7 +7,47 @@ import {
   FlexProps,
   Spinner,
 } from "@chakra-ui/core";
-import { PostFragment, useVoteMutation } from "../graphql/generated/graphql";
+import {
+  PostFragment,
+  useVoteMutation,
+  VoteMutation,
+} from "../graphql/generated/graphql";
+import gql from "graphql-tag";
+import { ApolloCache } from "@apollo/client";
+
+const updateAfterVote = (
+  { postId, value }: { postId: number; value: number },
+  cache: ApolloCache<VoteMutation>
+) => {
+  const data = cache.readFragment({
+    fragment: gql`
+      fragment _Post on Post {
+        points
+        voteStatus
+      }
+    `,
+    id: "Post:" + postId,
+  });
+
+  const { points, voteStatus } = (data as any) as {
+    points: number;
+    voteStatus: number | null;
+  };
+
+  cache.writeFragment({
+    fragment: gql`
+      fragment _Post on Post {
+        points
+        voteStatus
+      }
+    `,
+    id: "Post:" + postId,
+    data: {
+      points: points + (voteStatus ? 2 : 1) * value,
+      voteStatus: value,
+    },
+  });
+};
 
 const Updoot = ({ post, ...rest }: UpdootProps & FlexProps) => {
   const [vote, { loading }] = useVoteMutation();
@@ -20,10 +60,17 @@ const Updoot = ({ post, ...rest }: UpdootProps & FlexProps) => {
       ) : (
         <PseudoBox
           onClick={() => {
-            if (post.voteStatus === 1) return;
+            const value = 1;
 
-            setSelect(1);
-            vote({ variables: { postId: post.id, value: 1 } });
+            if (post.voteStatus === value) return;
+
+            setSelect(value);
+
+            vote({
+              variables: { postId: post.id, value },
+              update: (cache) =>
+                updateAfterVote({ postId: post.id, value }, cache),
+            });
           }}
           color={post.voteStatus === 1 ? "black" : "gray.400"}
           cursor={post.voteStatus === 1 ? "default" : "pointer"}
@@ -38,10 +85,17 @@ const Updoot = ({ post, ...rest }: UpdootProps & FlexProps) => {
       ) : (
         <PseudoBox
           onClick={() => {
-            if (post.voteStatus === -1) return;
+            const value = -1;
 
-            setSelect(-1);
-            vote({ variables: { postId: post.id, value: -1 } });
+            if (post.voteStatus === value) return;
+
+            setSelect(value);
+
+            vote({
+              variables: { postId: post.id, value },
+              update: (cache) =>
+                updateAfterVote({ postId: post.id, value }, cache),
+            });
           }}
           color={post.voteStatus === -1 ? "black" : "gray.400"}
           cursor={post.voteStatus === -1 ? "default" : "pointer"}
