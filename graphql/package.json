@@ -10,7 +10,8 @@
     "dev:run": "nodemon dist/index.js",
     "dev": "yarn dev:watch | yarn dev:run",
     "env:gen": "gen-env-types .env -o src/env.d.ts -e .",
-    "build": "tsc"
+    "build": "tsc",
+    "deploy": "node deploy.mjs"
   },
   "devDependencies": {
     "@types/connect-redis": "^0.0.14",

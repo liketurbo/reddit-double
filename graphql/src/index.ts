@@ -47,6 +47,8 @@ const start = async () => {
 
   const app = express();
 
+  app.set("trust proxy", 1);
+
   app.use(
     session({
       name: "sid",
