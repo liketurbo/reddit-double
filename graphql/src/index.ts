@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import "dotenv/config";
+import dotenv from "dotenv";
 import { PRODUCTION } from "./constants";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
@@ -19,6 +19,10 @@ import path from "path";
 import Updoot from "./entities/Updoot";
 import createUserLoader from "./loaders/createUserLoader";
 import createUpdootValueLoader from "./loaders/createUpdootValueLoader";
+
+dotenv.config({
+  path: PRODUCTION ? ".env.production" : ".env",
+});
 
 const RedisStore = connectRedis(session);
 

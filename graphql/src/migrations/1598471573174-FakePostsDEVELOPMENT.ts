@@ -1,8 +1,18 @@
 import { QueryRunner } from "typeorm";
+import argon2 from "argon2";
 
 export class FakePostsDEVELOPMENT1598471573174 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    queryRunner.query(
+    const passwordHashes = [await argon2.hash("ben"), await argon2.hash("tom")];
+
+    await queryRunner.query(
+      `insert into "user" (id, username, email, "passwordHash", "createdAt", "updatedAt") values 
+        (16, 'ben', 'ben@mail.com', $1, now(), now()),
+        (17, 'tom', 'tom@mail.com', $2, now(), now());`,
+      passwordHashes
+    );
+
+    await queryRunner.query(
       `insert into post (title, content, "creatorId", "createdAt", "updatedAt") values ('Proin leo odio, porttitor id, consequat in, consequat ut, nulla. Sed accumsan felis. Ut at dolor quis odio consequat varius.', 'Proin eu mi. Nulla ac enim. In tempor, turpis nec euismod scelerisque, quam turpis adipiscing lorem, vitae mattis nibh ligula nec sem.
 
 Duis aliquam convallis nunc. Proin at turpis a pede posuere nonummy. Integer non velit.

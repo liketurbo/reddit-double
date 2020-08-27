@@ -8,7 +8,7 @@ import {
   VoteMutationVariables,
 } from "../graphql/generated/graphql";
 import { cacheExchange, Cache, Resolver } from "@urql/exchange-graphcache";
-import { SSRExchange } from "next-urql";
+import { SSRExchange, NextUrqlClientConfig } from "next-urql";
 import { pipe, tap } from "wonka";
 import { Exchange } from "urql";
 import Router from "next/router";
@@ -86,9 +86,9 @@ const invalidateAllPosts = (cache: Cache) => {
 };
 
 const createUrqlClient = (ssrExchange: SSRExchange, ctx?: NextPageContext) => ({
-  url: "http://localhost:4000",
+  url: process.env.NEXT_PUBLIC_API_URL as string,
   fetchOptions: {
-    credentials: "include",
+    credentials: "include" as const,
     headers: typeof window === "undefined" && {
       cookie: ctx?.req?.headers.cookie,
     },
