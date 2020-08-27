@@ -60,7 +60,7 @@ const start = async () => {
         httpOnly: true,
         secure: PRODUCTION,
         sameSite: "lax",
-        domain: PRODUCTION ? ".10mem.ru" : undefined,
+        domain: PRODUCTION ? "10mem.ru" : undefined,
       },
       saveUninitialized: false,
     })
