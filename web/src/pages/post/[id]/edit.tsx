@@ -1,18 +1,16 @@
+import { Button, Spinner } from "@chakra-ui/core";
+import { Form, Formik } from "formik";
+import ErrorPage from "next/error";
+import { useRouter } from "next/router";
 import React from "react";
 import Container from "../../../components/Container";
 import NavBar from "../../../components/NavBar";
-import { Formik, Form } from "formik";
 import TextField from "../../../components/TextField";
-import { Button, Spinner } from "@chakra-ui/core";
 import { useUpdatePostMutation } from "../../../graphql/generated/graphql";
-import { withUrqlClient } from "next-urql";
-import createUrqlClient from "../../../utils/createUrqlClient";
-import ErrorPage from "next/error";
 import usePostFromUrl from "../../../hooks/usePostFromUrl";
-import { useRouter } from "next/router";
 
 const EditPostPage = () => {
-  const [, updatePost] = useUpdatePostMutation();
+  const [updatePost] = useUpdatePostMutation();
 
   const { data, fetching } = usePostFromUrl();
 
@@ -30,7 +28,9 @@ const EditPostPage = () => {
           initialValues={{ title: data.title, content: data.content }}
           onSubmit={async (values) => {
             await updatePost({
-              input: { ...values, id: data.id },
+              variables: {
+                input: { ...values, id: data.id },
+              },
             });
 
             router.back();
@@ -65,4 +65,4 @@ const EditPostPage = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(EditPostPage);
+export default EditPostPage;

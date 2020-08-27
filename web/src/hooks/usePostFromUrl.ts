@@ -11,11 +11,11 @@ const usePostFromUrl = () => {
       error: { message: "Post's id not provided" },
     };
 
-  const [{ data, fetching }] = usePostQuery({
+  const { data, loading } = usePostQuery({
     variables: { id: +router.query.id },
   });
 
-  if (fetching) return { data: null, fetching: true, error: null };
+  if (loading) return { data: null, fetching: true, error: null };
 
   if (data && data.post)
     return { data: data.post, fetching: false, error: null };

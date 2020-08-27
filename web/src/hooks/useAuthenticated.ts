@@ -5,16 +5,16 @@ import { useRouter } from "next/router";
 const useAuthenticated = () => {
   const router = useRouter();
 
-  const [{ data, fetching }] = useMeQuery();
+  const { data, loading } = useMeQuery();
 
   useEffect(() => {
-    if (!data?.me.user && !fetching) {
+    if (!data?.me.user && !loading) {
       const url = new URL("/login", window.location.origin);
       url.searchParams.append("next", router.pathname);
 
       router.replace(url);
     }
-  }, [data, fetching, router]);
+  }, [data, loading, router]);
 };
 
 export default useAuthenticated;

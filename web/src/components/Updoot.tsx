@@ -10,12 +10,12 @@ import {
 import { PostFragment, useVoteMutation } from "../graphql/generated/graphql";
 
 const Updoot = ({ post, ...rest }: UpdootProps & FlexProps) => {
-  const [{ fetching }, vote] = useVoteMutation();
+  const [vote, { loading }] = useVoteMutation();
   const [select, setSelect] = useState<-1 | 1>(-1);
 
   return (
     <Flex direction="column" alignItems="center" justify="center" {...rest}>
-      {select === 1 && fetching ? (
+      {select === 1 && loading ? (
         <Spinner />
       ) : (
         <PseudoBox
@@ -23,7 +23,7 @@ const Updoot = ({ post, ...rest }: UpdootProps & FlexProps) => {
             if (post.voteStatus === 1) return;
 
             setSelect(1);
-            vote({ postId: post.id, value: 1 });
+            vote({ variables: { postId: post.id, value: 1 } });
           }}
           color={post.voteStatus === 1 ? "black" : "gray.400"}
           cursor={post.voteStatus === 1 ? "default" : "pointer"}
@@ -33,7 +33,7 @@ const Updoot = ({ post, ...rest }: UpdootProps & FlexProps) => {
         </PseudoBox>
       )}
       <Text>{post.points}</Text>
-      {select === -1 && fetching ? (
+      {select === -1 && loading ? (
         <Spinner />
       ) : (
         <PseudoBox
@@ -41,7 +41,7 @@ const Updoot = ({ post, ...rest }: UpdootProps & FlexProps) => {
             if (post.voteStatus === -1) return;
 
             setSelect(-1);
-            vote({ postId: post.id, value: -1 });
+            vote({ variables: { postId: post.id, value: -1 } });
           }}
           color={post.voteStatus === -1 ? "black" : "gray.400"}
           cursor={post.voteStatus === -1 ? "default" : "pointer"}

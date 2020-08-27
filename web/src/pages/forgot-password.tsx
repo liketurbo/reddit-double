@@ -1,19 +1,16 @@
+import { Alert, AlertIcon, Button } from "@chakra-ui/core";
+import { Form, Formik } from "formik";
 import React, { useState } from "react";
-import { Alert, AlertIcon } from "@chakra-ui/core";
-import { withUrqlClient } from "next-urql";
-import { Formik, Form } from "formik";
-import { Button } from "@chakra-ui/core";
 import Container from "../components/Container";
+import NavBar from "../components/NavBar";
 import TextField from "../components/TextField";
 import { useForgotPasswordMutation } from "../graphql/generated/graphql";
 import toErrorMap from "../utils/toErrorMap";
-import createUrqlClient from "../utils/createUrqlClient";
-import NavBar from "../components/NavBar";
 
 const ForgotPasswordPage = () => {
   const [complete, setComplete] = useState(false);
 
-  const [, forgotPassword] = useForgotPasswordMutation();
+  const [forgotPassword] = useForgotPasswordMutation();
 
   return (
     <>
@@ -28,7 +25,7 @@ const ForgotPasswordPage = () => {
           <Formik
             initialValues={{ usernameOrEmail: "" }}
             onSubmit={async (values, { setErrors }) => {
-              const res = await forgotPassword(values);
+              const res = await forgotPassword({ variables: values });
 
               if (res.data?.forgotPassword.errors?.length) {
                 const errors = toErrorMap(res.data.forgotPassword.errors);
@@ -63,4 +60,4 @@ const ForgotPasswordPage = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(ForgotPasswordPage);
+export default ForgotPasswordPage;

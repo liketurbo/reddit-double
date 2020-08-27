@@ -1,17 +1,15 @@
-import React from "react";
-import { Formik, Form } from "formik";
 import { Button } from "@chakra-ui/core";
+import { Form, Formik } from "formik";
+import { useRouter } from "next/router";
+import React from "react";
 import Container from "../components/Container";
+import NavBar from "../components/NavBar";
 import TextField from "../components/TextField";
 import { useRegisterMutation } from "../graphql/generated/graphql";
 import toErrorMap from "../utils/toErrorMap";
-import { useRouter } from "next/router";
-import createUrqlClient from "../utils/createUrqlClient";
-import { withUrqlClient } from "next-urql";
-import NavBar from "../components/NavBar";
 
 const RegisterPage = () => {
-  const [, register] = useRegisterMutation();
+  const [register] = useRegisterMutation();
 
   const router = useRouter();
 
@@ -33,10 +31,12 @@ const RegisterPage = () => {
             }
 
             const res = await register({
-              input: {
-                username: values.username,
-                password: values.password,
-                email: values.email,
+              variables: {
+                input: {
+                  username: values.username,
+                  password: values.password,
+                  email: values.email,
+                },
               },
             });
 
@@ -90,4 +90,4 @@ const RegisterPage = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(RegisterPage);
+export default RegisterPage;

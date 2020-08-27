@@ -1,45 +1,44 @@
 import {
-  Text,
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Heading,
+  Link as ChakraLink,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Spinner,
   Stack,
-  Box,
-  Heading,
-  Flex,
-  Divider,
-  Icon,
-  PseudoBox,
+  Text,
 } from "@chakra-ui/core";
-import { withUrqlClient } from "next-urql";
-import createUrqlClient from "../utils/createUrqlClient";
-import {
-  usePostsQuery,
-  useRemovePostMutation,
-  useMeQuery,
-} from "../graphql/generated/graphql";
-import NavBar from "../components/NavBar";
-import { Menu, MenuButton, MenuList, MenuItem, Button } from "@chakra-ui/core";
-import Link from "next/link";
-import { Link as ChakraLink } from "@chakra-ui/core";
 import ErrorPage from "next/error";
+import Link from "next/link";
 import { useState } from "react";
-import Updoot from "../components/Updoot";
 import ControlButtons from "../components/ControlButtons";
+import NavBar from "../components/NavBar";
+import Updoot from "../components/Updoot";
+import { useMeQuery, usePostsQuery } from "../graphql/generated/graphql";
 
 const IndexPage = () => {
-  const [variables, setVariables] = useState({
-    limit: 10,
-    cursor: null as string | null,
-  });
-
-  const [{ data: postsData, fetching, error }] = usePostsQuery({
+  const {
+    data: postsData,
+    loading,
+    error,
+    fetchMore,
     variables,
+  } = usePostsQuery({
+    variables: {
+      limit: 10,
+      cursor: null as string | null,
+    },
+    notifyOnNetworkStatusChange: true,
   });
 
-  const [, removePost] = useRemovePostMutation();
+  const { data: meData } = useMeQuery();
 
-  const [{ data: meData }] = useMeQuery();
-
-  if (!postsData && fetching) return <Spinner />;
+  if (!postsData && loading) return <Spinner />;
 
   if (!postsData) return <ErrorPage statusCode={500} title={error?.message} />;
 
@@ -105,15 +104,17 @@ const IndexPage = () => {
       {postsData.posts.hasMore && (
         <Flex justify="center" mb={16}>
           <Button
-            onClick={() =>
-              setVariables({
-                limit: variables.limit,
-                cursor:
-                  postsData.posts.posts[postsData.posts.posts.length - 1]
-                    .createdAt,
-              })
-            }
-            isLoading={fetching}
+            onClick={() => {
+              const { posts } = postsData.posts;
+
+              fetchMore({
+                variables: {
+                  limit: variables?.limit,
+                  cursor: posts[posts.length - 1].createdAt,
+                },
+              });
+            }}
+            isLoading={loading}
           >
             Load more
           </Button>
@@ -123,4 +124,4 @@ const IndexPage = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(IndexPage);
+export default IndexPage;

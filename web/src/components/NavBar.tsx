@@ -1,27 +1,24 @@
-import React from "react";
 import {
+  Avatar,
+  Button,
+  Divider,
   Flex,
   Link as ChakraLink,
   Spinner,
-  Avatar,
   Text,
-  Button,
-  Divider,
 } from "@chakra-ui/core";
 import Link from "next/link";
-import { useMeQuery, useLogoutMutation } from "../graphql/generated/graphql";
-import { useRouter } from "next/router";
+import React from "react";
+import { useLogoutMutation, useMeQuery } from "../graphql/generated/graphql";
 
 const NavBar = () => {
-  const router = useRouter();
+  const [logout, { loading: logoutFetching, client }] = useLogoutMutation();
 
-  const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
-
-  const [{ data, fetching }] = useMeQuery();
+  const { data, loading } = useMeQuery();
 
   let body = null;
 
-  if (fetching) body = <Spinner ml="auto" />;
+  if (loading) body = <Spinner ml="auto" />;
   else if (!data?.me.user)
     body = (
       <>
@@ -50,7 +47,7 @@ const NavBar = () => {
           isLoading={logoutFetching}
           onClick={async () => {
             await logout();
-            router.reload();
+            await client.resetStore();
           }}
           size="xs"
         >

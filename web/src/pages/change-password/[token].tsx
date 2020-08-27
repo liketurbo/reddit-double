@@ -1,27 +1,25 @@
-import React, { useState } from "react";
+import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Button,
+  CloseButton,
+  Link as ChakraLink,
+} from "@chakra-ui/core";
+import { Form, Formik } from "formik";
+import ErrorPage from "next/error";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import { Formik, Form } from "formik";
+import React, { useState } from "react";
 import Container from "../../components/Container";
+import NavBar from "../../components/NavBar";
 import TextField from "../../components/TextField";
 import { useChangePasswordMutation } from "../../graphql/generated/graphql";
 import toErrorMap from "../../utils/toErrorMap";
-import createUrqlClient from "../../utils/createUrqlClient";
-import { withUrqlClient } from "next-urql";
-import NavBar from "../../components/NavBar";
-import ErrorPage from "next/error";
-import {
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-} from "@chakra-ui/core";
-import { CloseButton } from "@chakra-ui/core";
-import Link from "next/link";
-import { Button, Link as ChakraLink } from "@chakra-ui/core";
-import { GetServerSideProps } from "next";
 
 const ChangePasswordPage = () => {
-  const [, changePassword] = useChangePasswordMutation();
+  const [changePassword] = useChangePasswordMutation();
 
   const router = useRouter();
 
@@ -49,9 +47,11 @@ const ChangePasswordPage = () => {
             }
 
             const res = await changePassword({
-              input: {
-                newPassword: values.newPassword,
-                token,
+              variables: {
+                input: {
+                  newPassword: values.newPassword,
+                  token,
+                },
               },
             });
 
@@ -114,4 +114,4 @@ const ChangePasswordPage = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(ChangePasswordPage);
+export default ChangePasswordPage;

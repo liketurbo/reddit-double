@@ -1,19 +1,17 @@
+import { Button } from "@chakra-ui/core";
+import { Form, Formik } from "formik";
+import { useRouter } from "next/router";
 import React from "react";
 import Container from "../../components/Container";
 import NavBar from "../../components/NavBar";
-import { Formik, Form } from "formik";
 import TextField from "../../components/TextField";
-import { Button } from "@chakra-ui/core";
 import { useCreatePostMutation } from "../../graphql/generated/graphql";
-import { withUrqlClient } from "next-urql";
-import createUrqlClient from "../../utils/createUrqlClient";
-import { useRouter } from "next/router";
 import useAuthenticated from "../../hooks/useAuthenticated";
 
 const CreatePostPage = () => {
   const router = useRouter();
 
-  const [, createPost] = useCreatePostMutation();
+  const [createPost] = useCreatePostMutation();
 
   useAuthenticated();
 
@@ -24,11 +22,13 @@ const CreatePostPage = () => {
         <Formik
           initialValues={{ title: "", content: "" }}
           onSubmit={async (values) => {
-            const { error } = await createPost({
-              input: values,
+            const { errors } = await createPost({
+              variables: {
+                input: values,
+              },
             });
 
-            if (!error) router.push("/");
+            if (!errors?.length) router.push("/");
           }}
         >
           {(props) => (
@@ -60,4 +60,4 @@ const CreatePostPage = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(CreatePostPage);
+export default CreatePostPage;

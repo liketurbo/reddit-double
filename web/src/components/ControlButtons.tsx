@@ -1,13 +1,12 @@
-import React from "react";
-import { Flex, PseudoBox, Icon, FlexProps } from "@chakra-ui/core";
+import { Flex, FlexProps, Icon, PseudoBox } from "@chakra-ui/core";
 import Link from "next/link";
-import { useRemovePostMutation } from "../graphql/generated/graphql";
 import { useRouter } from "next/router";
-import { route } from "next/dist/next-server/server/router";
+import React from "react";
+import { useRemovePostMutation } from "../graphql/generated/graphql";
 
 const ControlButtons = ({ id, ...rest }: ControlButtonsProps) => {
   const router = useRouter();
-  const [, removePost] = useRemovePostMutation();
+  const [removePost] = useRemovePostMutation();
 
   return (
     <Flex {...rest}>
@@ -21,7 +20,7 @@ const ControlButtons = ({ id, ...rest }: ControlButtonsProps) => {
         cursor="pointer"
         _hover={{ color: "red.500" }}
         onClick={() => {
-          removePost({ id });
+          removePost({ variables: { id } });
           router.push("/");
         }}
       >

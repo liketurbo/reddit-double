@@ -1,13 +1,9 @@
-import React from "react";
-import { withUrqlClient } from "next-urql";
-import createUrqlClient from "../../utils/createUrqlClient";
-import { useRouter } from "next/router";
-import { usePostQuery } from "../../graphql/generated/graphql";
+import { Box, Heading, Spinner, Text } from "@chakra-ui/core";
 import ErrorPage from "next/error";
-import { Text, Heading, Box, Spinner } from "@chakra-ui/core";
+import React from "react";
+import ControlButtons from "../../components/ControlButtons";
 import NavBar from "../../components/NavBar";
 import usePostFromUrl from "../../hooks/usePostFromUrl";
-import ControlButtons from "../../components/ControlButtons";
 
 const PostPage = () => {
   const { data, fetching } = usePostFromUrl();
@@ -28,4 +24,4 @@ const PostPage = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(PostPage);
+export default PostPage;
